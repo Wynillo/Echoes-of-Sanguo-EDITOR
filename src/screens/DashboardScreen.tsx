@@ -6,6 +6,7 @@ import {
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import ValidationBanner, { useValidation } from '@/components/ValidationBanner'
+import { exportTcgToBlob, downloadBlob } from '@/fs/tcg'
 
 const SECTIONS = [
   { key: 'cards',        dataKey: 'cards',        icon: GiCardPick,       labelKey: 'section.cards' },
@@ -48,7 +49,15 @@ export default function DashboardScreen() {
             ← {t('nav.back')}
           </button>
           <button
-            onClick={() => {/* wired in Task 22 */}}
+            onClick={async () => {
+              try {
+                const blob = await exportTcgToBlob(data)
+                downloadBlob(blob, `${data.modInfo.id || 'mod'}.tcg`)
+              } catch (e) {
+                alert(t('export.error'))
+                console.error(e)
+              }
+            }}
             disabled={hasErrors}
             className="bg-indigo-700 hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
             title={hasErrors ? 'Fix validation errors before exporting' : undefined}
