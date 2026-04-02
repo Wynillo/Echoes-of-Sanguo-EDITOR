@@ -37,8 +37,28 @@ export default function StartScreen() {
   }
 
   async function handleImport() {
-    // .tcg import requires @wynillo/tcg-format — stub for now
-    alert('Import .tcg: requires @wynillo/tcg-format package (see README for setup)')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.tcg'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      try {
+        const { openTcgFile } = await import('@/fs/tcg')
+        const { importTcgResult } = await import('@/fs/importer')
+        const result = await openTcgFile(file)
+        const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
+        await importTcgResult(result, dir)
+        const data = await readProjectFolder(dir)
+        load(data, dir)
+        navigate('/project')
+      } catch (e) {
+        if ((e as DOMException).name !== 'AbortError') {
+          alert(`Import failed: ${(e as Error).message}`)
+        }
+      }
+    }
+    input.click()
   }
 
   const recent: string[] = (() => {
