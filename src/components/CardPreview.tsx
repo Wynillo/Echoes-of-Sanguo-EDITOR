@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from 'react'
 import type { EditorCard, EditorCardLocale } from '../types/project'
 
 // Attribute colors matching game style
@@ -21,7 +22,14 @@ interface CardPreviewProps {
 
 export default function CardPreview({ card, locale, image }: CardPreviewProps) {
   const color = ATTR_COLORS[card.attribute ?? 0] ?? '#444'
-  const imageUrl = image ? URL.createObjectURL(image) : null
+
+  const imageUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image])
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl)
+    }
+  }, [imageUrl])
 
   return (
     <div className={`w-36 rounded-xl overflow-hidden shadow-lg border border-white/10 flex flex-col ${TYPE_BG[card.type ?? 1] ?? 'bg-gray-800'}`}
