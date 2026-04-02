@@ -13,6 +13,9 @@ export default function CampaignEditor() {
     data.campaign[0]?.id ?? null
   )
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null)
+  // Local draft state for JSON fields keyed by `nodeId:field`
+  const [jsonDrafts, setJsonDrafts] = useState<Record<string, string>>({})
+  const [jsonErrors, setJsonErrors] = useState<Record<string, boolean>>({})
 
   const chapters = data.campaign
   const selectedChapter = chapters.find((c) => c.id === selectedChapterId) ?? null
@@ -59,10 +62,36 @@ export default function CampaignEditor() {
   }
 
   function deleteNode(chapterId: string, nodeId: string) {
+    if (!confirm('Delete this node?')) return
     save(chapters.map((c) => c.id === chapterId
       ? { ...c, nodes: c.nodes.filter((n) => n.id !== nodeId) }
       : c
     ))
+  }
+
+  function handleJsonChange(nodeId: string, field: string, text: string) {
+    const key = `${nodeId}:${field}`
+    setJsonDrafts((d) => ({ ...d, [key]: text }))
+    try {
+      JSON.parse(text)
+      setJsonErrors((e) => ({ ...e, [key]: false }))
+    } catch {
+      setJsonErrors((e) => ({ ...e, [key]: true }))
+    }
+  }
+
+  function commitJson(chapterId: string, nodeId: string, field: 'rewards' | 'unlockConditions') {
+    const key = `${nodeId}:${field}`
+    const text = jsonDrafts[key]
+    if (text === undefined || jsonErrors[key]) return
+    try {
+      updateNode(chapterId, nodeId, { [field]: JSON.parse(text) } as any)
+    } catch {}
+  }
+
+  function getJsonValue(nodeId: string, field: string, stored: unknown) {
+    const key = `${nodeId}:${field}`
+    return jsonDrafts[key] ?? JSON.stringify(stored ?? [], null, 2)
   }
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
@@ -129,7 +158,10 @@ export default function CampaignEditor() {
                         <div>
                           <label className="text-xs text-gray-400 mb-1 block">Node ID</label>
                           <input value={node.id}
-                            onChange={(e) => updateNode(selectedChapter.id, node.id, { id: e.target.value })}
+                            onChange={(e) => {
+                              updateNode(selectedChapter.id, node.id, { id: e.target.value })
+                              setExpandedNodeId(e.target.value)
+                            }}
                             className={`${inputCls} w-full`} />
                         </div>
                         <div>
@@ -150,22 +182,26 @@ export default function CampaignEditor() {
                         </div>
                       )}
                       <div>
-                        <label className="text-xs text-gray-400 mb-1 block">Rewards (JSON)</label>
+                        <label className="text-xs text-gray-400 mb-1 block">
+                          Rewards (JSON){jsonErrors[`${node.id}:rewards`] && <span className="text-red-400 ml-2">invalid JSON</span>}
+                        </label>
                         <textarea
-                          value={JSON.stringify(node.rewards ?? [], null, 2)}
-                          onChange={(e) => {
-                            try { updateNode(selectedChapter.id, node.id, { rewards: JSON.parse(e.target.value) }) } catch {}
-                          }}
-                          className={`${inputCls} w-full font-mono text-xs`} rows={3} />
+                          value={getJsonValue(node.id, 'rewards', node.rewards)}
+                          onChange={(e) => handleJsonChange(node.id, 'rewards', e.target.value)}
+                          onBlur={() => commitJson(selectedChapter.id, node.id, 'rewards')}
+                          className={`${inputCls} w-full font-mono text-xs ${jsonErrors[`${node.id}:rewards`] ? 'border-red-500' : ''}`}
+                          rows={3} />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-400 mb-1 block">Unlock Conditions (JSON)</label>
+                        <label className="text-xs text-gray-400 mb-1 block">
+                          Unlock Conditions (JSON){jsonErrors[`${node.id}:unlockConditions`] && <span className="text-red-400 ml-2">invalid JSON</span>}
+                        </label>
                         <textarea
-                          value={JSON.stringify(node.unlockConditions ?? [], null, 2)}
-                          onChange={(e) => {
-                            try { updateNode(selectedChapter.id, node.id, { unlockConditions: JSON.parse(e.target.value) }) } catch {}
-                          }}
-                          className={`${inputCls} w-full font-mono text-xs`} rows={3} />
+                          value={getJsonValue(node.id, 'unlockConditions', node.unlockConditions)}
+                          onChange={(e) => handleJsonChange(node.id, 'unlockConditions', e.target.value)}
+                          onBlur={() => commitJson(selectedChapter.id, node.id, 'unlockConditions')}
+                          className={`${inputCls} w-full font-mono text-xs ${jsonErrors[`${node.id}:unlockConditions`] ? 'border-red-500' : ''}`}
+                          rows={3} />
                       </div>
                     </div>
                   )}
