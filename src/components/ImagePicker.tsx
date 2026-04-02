@@ -1,3 +1,5 @@
+import { useMemo, useEffect } from 'react'
+
 interface Props {
   currentImage: Blob | null
   onImageChange: (blob: Blob) => void
@@ -15,7 +17,13 @@ export default function ImagePicker({ currentImage, onImageChange }: Props) {
     if (file?.type.startsWith('image/')) onImageChange(file)
   }
 
-  const url = currentImage ? URL.createObjectURL(currentImage) : null
+  const url = useMemo(() => currentImage ? URL.createObjectURL(currentImage) : null, [currentImage])
+
+  useEffect(() => {
+    return () => {
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [url])
 
   return (
     <div
