@@ -5,7 +5,7 @@ import {
   GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
-import ValidationBanner from '@/components/ValidationBanner'
+import ValidationBanner, { useValidation } from '@/components/ValidationBanner'
 
 const SECTIONS = [
   { key: 'cards',        dataKey: 'cards',        icon: GiCardPick,       labelKey: 'section.cards' },
@@ -28,11 +28,7 @@ export default function DashboardScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { data } = useProjectStore()
-
-  function handleExport() {
-    // Export wired in Task 22 after @wynillo/tcg-format is available
-    alert('Export: install @wynillo/tcg-format first (see README)')
-  }
+  const { hasErrors } = useValidation()
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
@@ -52,8 +48,10 @@ export default function DashboardScreen() {
             ← {t('nav.back')}
           </button>
           <button
-            onClick={handleExport}
-            className="bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            onClick={() => {/* wired in Task 22 */}}
+            disabled={hasErrors}
+            className="bg-indigo-700 hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            title={hasErrors ? 'Fix validation errors before exporting' : undefined}
           >
             {t('dashboard.export')}
           </button>
