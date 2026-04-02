@@ -12,30 +12,28 @@ export default function StartScreen() {
   const load = useProjectStore((s) => s.load)
 
   async function handleOpenFolder() {
-    const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
-    const data = await readProjectFolder(dir)
-    load(data, dir)
-    navigate('/project')
+    try {
+      const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
+      const data = await readProjectFolder(dir)
+      load(data, dir)
+      navigate('/project')
+    } catch (e) {
+      if ((e as DOMException).name !== 'AbortError') console.error(e)
+    }
   }
 
   async function handleNewProject() {
     const name = prompt(t('start.new') + ' — name:')
     if (!name) return
     const author = prompt('Author:') ?? ''
-    const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
-    load({
-      modInfo: {
-        id: name.toLowerCase().replace(/\s+/g, '-'),
-        name,
-        version: '1.0.0',
-        author,
-        type: 'expansion',
-        description: '',
-        minEngineVersion: '1.0.0',
-        formatVersion: 2,
-      },
-    }, dir)
-    navigate('/project')
+    try {
+      const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
+      load({ modInfo: { id: name.toLowerCase().replace(/\s+/g, '-'), name, version: '1.0.0',
+        author, type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } }, dir)
+      navigate('/project')
+    } catch (e) {
+      if ((e as DOMException).name !== 'AbortError') console.error(e)
+    }
   }
 
   async function handleImport() {
