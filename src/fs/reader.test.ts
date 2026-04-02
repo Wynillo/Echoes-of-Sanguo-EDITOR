@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { it, expect, vi } from 'vitest'
 import { readProjectFolder } from './reader'
 
 function mockDir(files: Record<string, string>): FileSystemDirectoryHandle {
