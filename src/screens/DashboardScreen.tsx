@@ -8,14 +8,14 @@ import { useProjectStore } from '@/stores/projectStore'
 import ValidationBanner from '@/components/ValidationBanner'
 
 const SECTIONS = [
-  { key: 'cards',        icon: GiCardPick,       labelKey: 'section.cards' },
-  { key: 'opponents',    icon: GiSwordman,        labelKey: 'section.opponents' },
-  { key: 'campaign',     icon: GiScrollUnfurled,  labelKey: 'section.campaign' },
-  { key: 'shop',         icon: GiShop,            labelKey: 'section.shop' },
-  { key: 'fusion',       icon: GiChemicalDrop,    labelKey: 'section.fusion' },
-  { key: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules' },
-  { key: 'localization', icon: GiWorld,           labelKey: 'section.localization' },
-  { key: 'modinfo',      icon: GiInfo,            labelKey: 'section.modinfo' },
+  { key: 'cards',        dataKey: 'cards',        icon: GiCardPick,       labelKey: 'section.cards' },
+  { key: 'opponents',    dataKey: 'opponents',    icon: GiSwordman,        labelKey: 'section.opponents' },
+  { key: 'campaign',     dataKey: 'campaign',     icon: GiScrollUnfurled,  labelKey: 'section.campaign' },
+  { key: 'shop',         dataKey: 'shop',         icon: GiShop,            labelKey: 'section.shop' },
+  { key: 'fusion',       dataKey: 'fusion',       icon: GiChemicalDrop,    labelKey: 'section.fusion' },
+  { key: 'rules',        dataKey: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules' },
+  { key: 'localization', dataKey: 'cardLocales',  icon: GiWorld,           labelKey: 'section.localization' },
+  { key: 'modinfo',      dataKey: 'modInfo',      icon: GiInfo,            labelKey: 'section.modinfo' },
 ] as const
 
 function sectionCount(data: Record<string, unknown>, key: string): number | null {
@@ -64,21 +64,24 @@ export default function DashboardScreen() {
 
       {/* Section grid */}
       <div className="grid grid-cols-4 gap-4 mt-6">
-        {SECTIONS.map(({ key, icon: Icon, labelKey }) => (
-          <button
-            key={key}
-            onClick={() => navigate(`/project/${key}`)}
-            className="bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-xl p-5 text-left transition-colors"
-          >
-            <Icon size={32} className="mb-2 text-indigo-400" />
-            <div className="font-semibold">{t(labelKey)}</div>
-            {sectionCount(data as unknown as Record<string, unknown>, key) !== null && (
-              <div className="text-sm text-gray-400">
-                {sectionCount(data as unknown as Record<string, unknown>, key)} entries
-              </div>
-            )}
-          </button>
-        ))}
+        {SECTIONS.map(({ key, dataKey, icon: Icon, labelKey }) => {
+          const count = sectionCount(data as unknown as Record<string, unknown>, dataKey)
+          return (
+            <button
+              key={key}
+              onClick={() => navigate(`/project/${key}`)}
+              className="bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-xl p-5 text-left transition-colors"
+            >
+              <Icon size={32} className="mb-2 text-indigo-400" />
+              <div className="font-semibold">{t(labelKey)}</div>
+              {count !== null && (
+                <div className="text-sm text-gray-400">
+                  {count} entries
+                </div>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
