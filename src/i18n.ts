@@ -7,6 +7,7 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'en',
   resources: { en: { translation: en } },
   interpolation: { escapeValue: false },
+  keySeparator: false,  // keys use dot-notation as literal strings, not nested paths
 })
 
 export default i18n
