@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useState } from 'react'
 import * as GiIcons from 'react-icons/gi'
 
@@ -27,7 +28,7 @@ export default function GiIconPicker({ value, onSelect, onClear }: Props) {
       />
       <div className="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
         {filtered.map((name) => {
-          const Icon = GiIcons[name]
+          const Icon = GiIcons[name] as React.ComponentType<{ size?: number }>
           return (
             <button
               key={name}

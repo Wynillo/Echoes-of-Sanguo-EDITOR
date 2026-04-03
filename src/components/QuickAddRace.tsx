@@ -51,6 +51,7 @@ export default function QuickAddRace({ existingIds, onAdd, onCancel }: Props) {
         <input
           value={emoji}
           onChange={(e) => setEmoji(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="🐲"
           maxLength={2}
           className={`${inputCls} w-10 text-center`}

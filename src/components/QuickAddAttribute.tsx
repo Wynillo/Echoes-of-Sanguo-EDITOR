@@ -38,6 +38,7 @@ export default function QuickAddAttribute({ existingIds, onAdd, onCancel }: Prop
       <input
         value={symbol}
         onChange={(e) => setSymbol(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder="☀"
         maxLength={2}
         className={`${inputCls} w-10 text-center`}
