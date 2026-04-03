@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
 import type { EditorFusionFormula } from '../types/project'
@@ -41,10 +42,12 @@ export default function FusionEditor() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="text-gray-400 hover:text-white text-sm">← Dashboard</button>
+        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
+          <FaArrowLeft size={12} /> Dashboard
+        </button>
         <span className="text-gray-600">/</span>
         <span className="font-semibold">Fusion Formulas</span>
-        <button onClick={addFormula} className="ml-auto bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm">+ Add Formula</button>
+        <button onClick={addFormula} className="cursor-pointer ml-auto bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm transition-colors">+ Add Formula</button>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -65,7 +68,7 @@ export default function FusionEditor() {
                   <input type="number" min={1} value={f.priority} onChange={(e) => patch(f.id, { priority: parseInt(e.target.value) || 1 })} className={`${inputCls} w-20`} />
                 </div>
               </div>
-              <button onClick={() => deleteFormula(f.id)} className="text-red-400 text-sm px-3 py-1.5 rounded border border-red-800">Delete</button>
+              <button onClick={() => deleteFormula(f.id)} className="cursor-pointer text-red-400 hover:text-red-300 text-sm px-3 py-1.5 rounded border border-red-800 transition-colors">Delete</button>
             </div>
 
             {/* Result pool — multi-select from cards */}
@@ -75,7 +78,7 @@ export default function FusionEditor() {
                 {f.resultPool.map((cid, i) => (
                   <span key={i} className="bg-gray-700 text-xs px-2 py-0.5 rounded flex items-center gap-1">
                     {getName(cid)}
-                    <button onClick={() => patch(f.id, { resultPool: f.resultPool.filter((_, j) => j !== i) })} className="text-red-400">✕</button>
+                    <button onClick={() => patch(f.id, { resultPool: f.resultPool.filter((_, j) => j !== i) })} className="cursor-pointer text-red-400 hover:text-red-300 transition-colors"><FaXmark size={8} /></button>
                   </span>
                 ))}
               </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 
 interface Props {
@@ -38,9 +39,9 @@ export default function DeckBuilder({ value, onChange, label }: Props) {
               <span>{getName(id)}</span>
               <button
                 onClick={() => remove(i)}
-                className="text-red-400 ml-2"
+                className="cursor-pointer text-red-400 hover:text-red-300 ml-2 transition-colors"
               >
-                ✕
+                <FaXmark size={10} />
               </button>
             </div>
           ))}
@@ -58,7 +59,7 @@ export default function DeckBuilder({ value, onChange, label }: Props) {
               <button
                 key={c.id}
                 onClick={() => add(c.id)}
-                className="w-full text-left px-2 py-1 text-xs hover:bg-gray-800 truncate"
+                className="cursor-pointer w-full text-left px-2 py-1 text-xs hover:bg-gray-800 truncate transition-colors"
               >
                 {getName(c.id)}
               </button>

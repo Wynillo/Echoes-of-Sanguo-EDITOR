@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
 import CardPreview from '../components/CardPreview'
@@ -49,12 +50,12 @@ export default function CardEditor() {
     navigate('/project/cards')
   }
 
-  const inputCls = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
+  const inputCls = 'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-violet-500/50'
   const selCls = inputCls
 
-  function field(label: string, element: React.ReactNode) {
+  function field(label: string, element: React.ReactNode, fullWidth = false) {
     return (
-      <div>
+      <div className={fullWidth ? 'col-span-2' : ''}>
         <label className="text-xs text-gray-400 mb-1 block">{label}</label>
         {element}
       </div>
@@ -64,13 +65,19 @@ export default function CardEditor() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project/cards')} className="text-gray-400 hover:text-white text-sm">
-          ← {t('section.cards')}
+        <button
+          onClick={() => navigate('/project/cards')}
+          className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5"
+        >
+          <FaArrowLeft size={12} /> {t('section.cards')}
         </button>
         <span className="text-gray-600">/</span>
         <span className="font-semibold">{locale.name || `Card ${cardId}`}</span>
         <div className="ml-auto flex gap-2">
-          <button onClick={handleDelete} className="text-red-400 hover:text-red-300 text-sm px-3 py-1.5 rounded-lg border border-red-800">
+          <button
+            onClick={handleDelete}
+            className="cursor-pointer text-red-400 hover:text-red-300 text-sm px-3 py-1.5 rounded-lg border border-red-800 transition-colors"
+          >
             {t('editor.delete')}
           </button>
         </div>
@@ -84,7 +91,7 @@ export default function CardEditor() {
           ))}
           {field(t('card.description'), (
             <textarea value={locale.description} onChange={(e) => patchLocale({ description: e.target.value })} className={inputCls} rows={3} />
-          ))}
+          ), true)}
           {field(t('card.type'), (
             <select value={card.type} onChange={(e) => patchCard({ type: parseInt(e.target.value) as EditorCard['type'] })} className={selCls}>
               {CARD_TYPES.map((l, v) => v > 0 && <option key={v} value={v}>{l}</option>)}
@@ -146,12 +153,20 @@ export default function CardEditor() {
                   next[i] = { ...next[i], trigger: v }
                   patchCard({ effects: next })
                 }} />
-                <button onClick={() => patchCard({ effects: (card.effects ?? []).filter((_, j) => j !== i) })}
-                  className="text-red-400 text-xs flex-shrink-0">✕</button>
+                <button
+                  onClick={() => patchCard({ effects: (card.effects ?? []).filter((_, j) => j !== i) })}
+                  className="cursor-pointer text-red-400 hover:text-red-300 flex-shrink-0 transition-colors"
+                >
+                  <FaXmark size={10} />
+                </button>
               </div>
             ))}
-            <button onClick={() => patchCard({ effects: [...(card.effects ?? []), { trigger: '', actions: [] }] })}
-              className="text-xs text-indigo-400 hover:text-indigo-300 mt-1">+ Add effect</button>
+            <button
+              onClick={() => patchCard({ effects: [...(card.effects ?? []), { trigger: '', actions: [] }] })}
+              className="cursor-pointer text-xs text-indigo-400 hover:text-indigo-300 mt-1 transition-colors"
+            >
+              + Add effect
+            </button>
           </div>
         </div>
 

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FaArrowLeft, FaSpinner } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
   GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
@@ -9,14 +11,14 @@ import ValidationBanner, { useValidation } from '@/components/ValidationBanner'
 import { exportTcgToBlob, downloadBlob } from '@/fs/tcg'
 
 const SECTIONS = [
-  { key: 'cards',        dataKey: 'cards',        icon: GiCardPick,       labelKey: 'section.cards' },
-  { key: 'opponents',    dataKey: 'opponents',    icon: GiSwordman,        labelKey: 'section.opponents' },
-  { key: 'campaign',     dataKey: 'campaign',     icon: GiScrollUnfurled,  labelKey: 'section.campaign' },
-  { key: 'shop',         dataKey: 'shop',         icon: GiShop,            labelKey: 'section.shop' },
-  { key: 'fusion',       dataKey: 'fusion',       icon: GiChemicalDrop,    labelKey: 'section.fusion' },
-  { key: 'rules',        dataKey: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules' },
-  { key: 'localization', dataKey: 'cardLocales',  icon: GiWorld,           labelKey: 'section.localization' },
-  { key: 'modinfo',      dataKey: 'modInfo',      icon: GiInfo,            labelKey: 'section.modinfo' },
+  { key: 'cards',        dataKey: 'cards',        icon: GiCardPick,       labelKey: 'section.cards',        color: 'text-amber-400' },
+  { key: 'opponents',    dataKey: 'opponents',    icon: GiSwordman,        labelKey: 'section.opponents',    color: 'text-red-400' },
+  { key: 'campaign',     dataKey: 'campaign',     icon: GiScrollUnfurled,  labelKey: 'section.campaign',     color: 'text-emerald-400' },
+  { key: 'shop',         dataKey: 'shop',         icon: GiShop,            labelKey: 'section.shop',         color: 'text-yellow-400' },
+  { key: 'fusion',       dataKey: 'fusion',       icon: GiChemicalDrop,    labelKey: 'section.fusion',       color: 'text-purple-400' },
+  { key: 'rules',        dataKey: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules',        color: 'text-blue-400' },
+  { key: 'localization', dataKey: 'cardLocales',  icon: GiWorld,           labelKey: 'section.localization', color: 'text-teal-400' },
+  { key: 'modinfo',      dataKey: 'modInfo',      icon: GiInfo,            labelKey: 'section.modinfo',      color: 'text-slate-300' },
 ] as const
 
 function sectionCount(data: Record<string, unknown>, key: string): number | null {
@@ -30,6 +32,7 @@ export default function DashboardScreen() {
   const navigate = useNavigate()
   const { data } = useProjectStore()
   const { hasErrors } = useValidation()
+  const [exporting, setExporting] = useState(false)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
@@ -41,28 +44,32 @@ export default function DashboardScreen() {
             v{data.modInfo.version} · {data.modInfo.author}
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
           <button
             onClick={() => navigate('/')}
-            className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm transition-colors"
+            className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5"
           >
-            ← {t('nav.back')}
+            <FaArrowLeft size={12} /> {t('nav.back')}
           </button>
           <button
             onClick={async () => {
+              setExporting(true)
               try {
                 const blob = await exportTcgToBlob(data)
                 downloadBlob(blob, `${data.modInfo.id || 'mod'}.tcg`)
               } catch (e) {
                 alert(t('export.error'))
                 console.error(e)
+              } finally {
+                setExporting(false)
               }
             }}
-            disabled={hasErrors}
-            className="bg-indigo-700 hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            disabled={hasErrors || exporting}
+            className="cursor-pointer flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
             title={hasErrors ? 'Fix validation errors before exporting' : undefined}
           >
-            {t('dashboard.export')}
+            {exporting && <FaSpinner size={12} className="animate-spin" />}
+            {exporting ? 'Exporting…' : t('dashboard.export')}
           </button>
         </div>
       </div>
@@ -71,20 +78,20 @@ export default function DashboardScreen() {
 
       {/* Section grid */}
       <div className="grid grid-cols-4 gap-4 mt-6">
-        {SECTIONS.map(({ key, dataKey, icon: Icon, labelKey }) => {
+        {SECTIONS.map(({ key, dataKey, icon: Icon, labelKey, color }) => {
           const count = sectionCount(data as unknown as Record<string, unknown>, dataKey)
           return (
             <button
               key={key}
               onClick={() => navigate(`/project/${key}`)}
-              className="bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-xl p-5 text-left transition-colors"
+              className="cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-violet-700/50 rounded-xl p-5 text-left transition-all hover:shadow-md hover:shadow-violet-950/30"
             >
-              <Icon size={32} className="mb-2 text-indigo-400" />
+              <Icon size={32} className={`mb-3 ${color}`} />
               <div className="font-semibold">{t(labelKey)}</div>
               {count !== null && (
-                <div className="text-sm text-gray-400">
-                  {count} entries
-                </div>
+                <span className="text-xs bg-slate-700/60 text-slate-300 px-2 py-0.5 rounded-full mt-1 inline-block">
+                  {count}
+                </span>
               )}
             </button>
           )

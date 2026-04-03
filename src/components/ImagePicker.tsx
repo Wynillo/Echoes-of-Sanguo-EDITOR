@@ -29,7 +29,7 @@ export default function ImagePicker({ currentImage, onImageChange }: Props) {
     <div
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
-      className="border-2 border-dashed border-gray-700 rounded-lg p-3 text-center cursor-pointer hover:border-indigo-500 transition-colors"
+      className="border-2 border-dashed border-gray-700 rounded-lg p-3 text-center cursor-pointer hover:border-violet-500 transition-colors"
       onClick={() => document.getElementById('img-input')?.click()}
     >
       {url ? (
