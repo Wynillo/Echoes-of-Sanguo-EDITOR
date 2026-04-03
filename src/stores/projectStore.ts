@@ -23,6 +23,7 @@ interface ProjectStore {
   updateCard: (id: number, patch: Partial<EditorCard>) => void
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
+  setDirHandle: (dir: FileSystemDirectoryHandle) => void
 }
 
 export const useProjectStore = create<ProjectStore>((set) => ({
@@ -48,4 +49,6 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   setCards: (cards) => set((s) => ({ data: { ...s.data, cards } })),
 
   setData: (key, value) => set((s) => ({ data: { ...s.data, [key]: value } })),
+
+  setDirHandle: (dir) => set({ dirHandle: dir }),
 }))
