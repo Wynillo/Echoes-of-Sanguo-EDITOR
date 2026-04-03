@@ -6,12 +6,12 @@ export interface EditorCard {
   level?: number
   atk?: number
   def?: number
-  attribute?: 1 | 2 | 3 | 4 | 5 | 6
+  attribute?: number               // loosened from 1|2|3|4|5|6 union
   race?: number
   atkBonus?: number
   defBonus?: number
   equipReqRace?: number
-  equipReqAttr?: 1 | 2 | 3 | 4 | 5 | 6
+  equipReqAttr?: number            // loosened from 1|2|3|4|5|6 union
   spellType?: 1 | 2 | 3 | 4
   effect?: string
   effects?: Array<{ trigger: string; actions: string[] }>
@@ -86,6 +86,23 @@ export interface EditorModInfo {
   formatVersion: number
 }
 
+export interface EditorAttribute {
+  id: number
+  key: string
+  value: string
+  color: string
+  symbol?: string
+}
+
+export interface EditorRace {
+  id: number
+  key: string
+  value: string
+  color: string
+  icon?: string
+  emoji?: string
+}
+
 export interface ProjectData {
   modInfo: EditorModInfo
   cards: EditorCard[]
@@ -95,6 +112,8 @@ export interface ProjectData {
   shop: EditorShopPack[]
   fusion: EditorFusionFormula[]
   rules: EditorRules
+  attributes: EditorAttribute[]
+  races: EditorRace[]
   // image blobs keyed by card id (loaded from img/)
   images: Record<number, Blob>
 }
