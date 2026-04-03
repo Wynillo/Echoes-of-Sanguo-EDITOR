@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
 import type { EditorCardLocale } from '../types/project'
@@ -20,12 +21,14 @@ export default function LocalizationEditor() {
     if (dirHandle) writeJsonFile(dirHandle, 'locales/en.json', next).catch(console.error)
   }
 
-  const cellCls = 'bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm text-white w-full'
+  const cellCls = 'bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm text-white w-full focus:outline-none focus:ring-1 focus:ring-violet-500/50'
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="text-gray-400 hover:text-white text-sm">← Dashboard</button>
+        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
+          <FaArrowLeft size={12} /> Dashboard
+        </button>
         <span className="text-gray-600">/</span>
         <span className="font-semibold">Localization</span>
         <input value={search} onChange={(e) => setSearch(e.target.value)}

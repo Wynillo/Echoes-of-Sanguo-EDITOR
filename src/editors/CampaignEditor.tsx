@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FaArrowLeft, FaXmark, FaChevronUp, FaChevronDown } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
@@ -99,8 +100,8 @@ export default function CampaignEditor() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="text-gray-400 hover:text-white text-sm">
-          ← Dashboard
+        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
+          <FaArrowLeft size={12} /> Dashboard
         </button>
         <span className="text-gray-600">/</span>
         <span className="font-semibold">Campaign</span>
@@ -111,7 +112,7 @@ export default function CampaignEditor() {
         <div className="w-56 flex-shrink-0">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-gray-400 uppercase tracking-wide">Chapters</span>
-            <button onClick={addChapter} className="text-xs text-indigo-400 hover:text-indigo-300">+ Add</button>
+            <button onClick={addChapter} className="cursor-pointer text-xs text-indigo-400 hover:text-indigo-300 transition-colors">+ Add</button>
           </div>
           <div className="flex flex-col gap-1">
             {chapters.map((ch) => (
@@ -119,7 +120,7 @@ export default function CampaignEditor() {
                 onClick={() => setSelectedChapterId(ch.id)}>
                 <span className="flex-1 text-sm truncate">{ch.title}</span>
                 <button onClick={(e) => { e.stopPropagation(); deleteChapter(ch.id) }}
-                  className="text-red-400 text-xs opacity-0 hover:opacity-100 group-hover:opacity-100">✕</button>
+                  className="cursor-pointer text-red-400 text-xs opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity"><FaXmark size={10} /></button>
               </div>
             ))}
           </div>
@@ -135,7 +136,7 @@ export default function CampaignEditor() {
                 className={`${inputCls} text-lg font-semibold flex-1`}
                 placeholder="Chapter title"
               />
-              <button onClick={addNode} className="bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm">
+              <button onClick={addNode} className="cursor-pointer bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm transition-colors">
                 + Add Node
               </button>
             </div>
@@ -147,9 +148,9 @@ export default function CampaignEditor() {
                     onClick={() => setExpandedNodeId(expandedNodeId === node.id ? null : node.id)}>
                     <span className="text-xs bg-gray-700 px-2 py-0.5 rounded font-mono">{node.type}</span>
                     <span className="text-sm flex-1">{node.id}</span>
-                    <span className="text-xs text-gray-500">{expandedNodeId === node.id ? '▲' : '▼'}</span>
+                    <span className="text-gray-500">{expandedNodeId === node.id ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}</span>
                     <button onClick={(e) => { e.stopPropagation(); deleteNode(selectedChapter.id, node.id) }}
-                      className="text-red-400 text-xs">✕</button>
+                      className="cursor-pointer text-red-400 transition-colors hover:text-red-300"><FaXmark size={10} /></button>
                   </div>
 
                   {expandedNodeId === node.id && (

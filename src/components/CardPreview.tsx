@@ -1,4 +1,6 @@
 import { useMemo, useEffect } from 'react'
+import { GiSun, GiMoon, GiFlame, GiWaterDrop, GiMountains, GiTornado } from 'react-icons/gi'
+import { FaStar } from 'react-icons/fa6'
 import type { EditorCard, EditorCardLocale } from '../types/project'
 
 // Attribute colors matching game style
@@ -6,8 +8,8 @@ const ATTR_COLORS: Record<number, string> = {
   1: '#c09000', 2: '#7020a0', 3: '#c0300a',
   4: '#1a6aaa', 5: '#6a7030', 6: '#4a6080',
 }
-const ATTR_LABELS: Record<number, string> = {
-  1: '☀', 2: '☽', 3: '🔥', 4: '💧', 5: '⛰', 6: '💨',
+const ATTR_ICONS: Record<number, React.ComponentType<{ size?: number; color?: string }>> = {
+  1: GiSun, 2: GiMoon, 3: GiFlame, 4: GiWaterDrop, 5: GiMountains, 6: GiTornado,
 }
 const TYPE_BG: Record<number, string> = {
   1: 'bg-amber-900', 2: 'bg-purple-900', 3: 'bg-teal-900',
@@ -22,6 +24,7 @@ interface CardPreviewProps {
 
 export default function CardPreview({ card, locale, image }: CardPreviewProps) {
   const color = ATTR_COLORS[card.attribute ?? 0] ?? '#444'
+  const AttrIcon = card.attribute ? ATTR_ICONS[card.attribute] : null
 
   const imageUrl = useMemo(() => image ? URL.createObjectURL(image) : null, [image])
 
@@ -38,7 +41,11 @@ export default function CardPreview({ card, locale, image }: CardPreviewProps) {
       <div className="px-2 pt-2 pb-1">
         <div className="text-xs font-bold truncate text-white">{locale.name || 'Unnamed'}</div>
         {card.level != null && (
-          <div className="text-yellow-400 text-xs">{'⭐'.repeat(Math.min(card.level, 12))}</div>
+          <div className="flex flex-wrap gap-0.5 mt-0.5">
+            {Array.from({ length: Math.min(card.level, 12) }).map((_, i) => (
+              <FaStar key={i} size={8} className="text-yellow-400" />
+            ))}
+          </div>
         )}
       </div>
       {/* Artwork */}
@@ -56,9 +63,9 @@ export default function CardPreview({ card, locale, image }: CardPreviewProps) {
             <span>{card.def ?? '—'}</span>
           </div>
         )}
-        {card.attribute && (
-          <div className="text-xs text-right" style={{ color }}>
-            {ATTR_LABELS[card.attribute]}
+        {AttrIcon && (
+          <div className="text-right mt-0.5">
+            <AttrIcon size={14} color={color} />
           </div>
         )}
       </div>
