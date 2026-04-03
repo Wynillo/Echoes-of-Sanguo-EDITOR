@@ -29,14 +29,16 @@ export default function StartScreen() {
 
   async function handleCreate() {
     if (!newName.trim()) return
+    let dir: FileSystemDirectoryHandle | null = null
     try {
-      const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
-      load({ modInfo: { id: newName.toLowerCase().replace(/\s+/g, '-'), name: newName.trim(), version: '1.0.0',
-        author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } }, dir)
-      navigate('/project')
+      dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
     } catch (e) {
-      if ((e as DOMException).name !== 'AbortError') console.error(e)
+      if ((e as DOMException).name !== 'AbortError') { console.error(e); return }
+      // AbortError = User closed the picker → continue without a folder
     }
+    load({ modInfo: { id: newName.toLowerCase().replace(/\s+/g, '-'), name: newName.trim(), version: '1.0.0',
+      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } }, dir)
+    navigate('/project')
   }
 
   async function handleImport() {
@@ -124,6 +126,9 @@ export default function StartScreen() {
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             className={inputCls}
           />
+          <p className="text-xs text-slate-500">
+            A folder can be selected for auto-save. Skip to work in-memory only.
+          </p>
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setShowNewForm(false)}
@@ -136,7 +141,7 @@ export default function StartScreen() {
               disabled={!newName.trim()}
               className="cursor-pointer bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
             >
-              Create & Choose Folder
+              Create
             </button>
           </div>
         </div>
