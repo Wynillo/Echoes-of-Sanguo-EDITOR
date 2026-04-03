@@ -22,6 +22,8 @@ export async function exportTcgToBlob(
   zip.file('shop.json', JSON.stringify(data.shop, null, 2))
   zip.file('fusion_formulas.json', JSON.stringify(data.fusion, null, 2))
   zip.file('rules.json', JSON.stringify(data.rules, null, 2))
+  zip.file('attributes.json', JSON.stringify(data.attributes, null, 2))
+  zip.file('races.json', JSON.stringify(data.races, null, 2))
   zip.file('mod.json', JSON.stringify({
     id: data.modInfo.id,
     name: data.modInfo.name,
