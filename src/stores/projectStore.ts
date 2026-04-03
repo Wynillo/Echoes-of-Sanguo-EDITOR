@@ -1,17 +1,44 @@
 import { create } from 'zustand'
-import type { ProjectData, EditorCard } from '../types/project'
+import type { ProjectData, EditorCard, EditorAttribute, EditorRace } from '../types/project'
 
 const DEFAULT_RULES = {
   startingLP: 8000, maxFieldZones: 5, deckSize: 40,
   cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8,
 }
 
+export const DEFAULT_ATTRIBUTES: EditorAttribute[] = [
+  { id: 1,  key: 'Light', value: 'Light', color: '#c09000', symbol: '☀' },
+  { id: 2,  key: 'Dark',  value: 'Dark',  color: '#7020a0', symbol: '☽' },
+  { id: 3,  key: 'Fire',  value: 'Fire',  color: '#c0300a', symbol: '♨' },
+  { id: 4,  key: 'Water', value: 'Water', color: '#1a6aaa', symbol: '◎' },
+  { id: 5,  key: 'Earth', value: 'Earth', color: '#6a7030', symbol: '◆' },
+  { id: 6,  key: 'Wind',  value: 'Wind',  color: '#4a6080', symbol: '∿' },
+]
+
+export const DEFAULT_RACES: EditorRace[] = [
+  { id: 1,  key: 'Dragon',      value: 'Dragon',      color: '#8040c0', icon: 'GiDragonHead',    emoji: '🐲' },
+  { id: 2,  key: 'Spellcaster', value: 'Spellcaster', color: '#6060c0', icon: 'GiWizardStaff',   emoji: '🔮' },
+  { id: 3,  key: 'Warrior',     value: 'Warrior',     color: '#c09030', icon: 'GiSwordman',      emoji: '⚔️' },
+  { id: 4,  key: 'Beast',       value: 'Beast',       color: '#e07030', icon: 'GiMechanicHead',  emoji: '🐅' },
+  { id: 5,  key: 'Plant',       value: 'Plant',       color: '#40a050', icon: 'GiTreeface',      emoji: '🌿' },
+  { id: 6,  key: 'Rock',        value: 'Rock',        color: '#808060', icon: 'GiRock',          emoji: '🪨' },
+  { id: 7,  key: 'Phoenix',     value: 'Phoenix',     color: '#e06020', icon: 'GiFlame',         emoji: '🔥' },
+  { id: 8,  key: 'Undead',      value: 'Undead',      color: '#804090', icon: 'GiSkull',         emoji: '💀' },
+  { id: 9,  key: 'Aqua',        value: 'Aqua',        color: '#3080b0', icon: 'GiWater',         emoji: '🌊' },
+  { id: 10, key: 'Insect',      value: 'Insect',      color: '#90a040', icon: 'GiButterfly',     emoji: '🦋' },
+  { id: 11, key: 'Machine',     value: 'Machine',     color: '#708090', icon: 'GiMechanicalArm', emoji: '⚙️' },
+  { id: 12, key: 'Pyro',        value: 'Pyro',        color: '#c03010', icon: 'GiFire',          emoji: '♨'  },
+]
+
 const EMPTY_DATA: ProjectData = {
   modInfo: { id: '', name: '', version: '1.0.0', author: '', type: 'expansion',
     description: '', minEngineVersion: '1.0.0', formatVersion: 2 },
   cards: [], cardLocales: [], opponents: [],
   campaign: [], shop: [], fusion: [],
-  rules: DEFAULT_RULES, images: {},
+  rules: DEFAULT_RULES,
+  attributes: DEFAULT_ATTRIBUTES,
+  races: DEFAULT_RACES,
+  images: {},
 }
 
 interface ProjectStore {
