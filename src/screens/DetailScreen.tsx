@@ -7,6 +7,7 @@ import FusionEditor from '@/editors/FusionEditor'
 import RulesEditor from '@/editors/RulesEditor'
 import LocalizationEditor from '@/editors/LocalizationEditor'
 import ModInfoEditor from '@/editors/ModInfoEditor'
+import GameDataEditor from '@/editors/GameDataEditor'
 
 const EDITORS: Record<string, React.ComponentType> = {
   cards: CardEditor,
@@ -17,6 +18,7 @@ const EDITORS: Record<string, React.ComponentType> = {
   rules: RulesEditor,
   localization: LocalizationEditor,
   modinfo: ModInfoEditor,
+  gamedata: GameDataEditor,
 }
 
 export default function DetailScreen() {

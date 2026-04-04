@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
-  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiDragonHead,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import ValidationBanner, { useValidation } from '@/components/ValidationBanner'
@@ -17,6 +17,7 @@ const SECTIONS = [
   { key: 'rules',        dataKey: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules' },
   { key: 'localization', dataKey: 'cardLocales',  icon: GiWorld,           labelKey: 'section.localization' },
   { key: 'modinfo',      dataKey: 'modInfo',      icon: GiInfo,            labelKey: 'section.modinfo' },
+  { key: 'gamedata',    dataKey: 'gamedata',     icon: GiDragonHead,      labelKey: 'section.gamedata' },
 ] as const
 
 function sectionCount(data: Record<string, unknown>, key: string): number | null {
