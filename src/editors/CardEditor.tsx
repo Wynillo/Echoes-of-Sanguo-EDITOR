@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
@@ -6,12 +7,12 @@ import { writeJsonFile } from '../fs/writer'
 import CardPreview from '../components/CardPreview'
 import ImagePicker from '../components/ImagePicker'
 import EffectPicker from '../components/EffectPicker'
-import type { EditorCard, EditorCardLocale } from '../types/project'
+import QuickAddAttribute from '../components/QuickAddAttribute'
+import QuickAddRace from '../components/QuickAddRace'
+import type { EditorCard, EditorCardLocale, EditorAttribute, EditorRace } from '../types/project'
 
 const CARD_TYPES = ['', 'Monster', 'Fusion', 'Spell', 'Trap', 'Equipment']
 const RARITIES = [{ v: 1, l: 'Common' }, { v: 2, l: 'Uncommon' }, { v: 4, l: 'Rare' }, { v: 6, l: 'SuperRare' }, { v: 8, l: 'UltraRare' }]
-const ATTRIBUTES = [{ v: 1, l: 'Light' }, { v: 2, l: 'Dark' }, { v: 3, l: 'Fire' }, { v: 4, l: 'Water' }, { v: 5, l: 'Earth' }, { v: 6, l: 'Wind' }]
-const RACES = ['', 'Dragon', 'Spellcaster', 'Warrior', 'Beast', 'Plant', 'Rock', 'Phoenix', 'Undead', 'Aqua', 'Insect', 'Machine', 'Pyro']
 const SPELL_TYPES = [{ v: 1, l: 'Normal' }, { v: 2, l: 'Targeted' }, { v: 3, l: 'From Grave' }, { v: 4, l: 'Field' }]
 
 export default function CardEditor() {
@@ -19,6 +20,23 @@ export default function CardEditor() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { data, dirHandle, updateCard, setData } = useProjectStore()
+
+  const { attributes, races } = data
+  const [quickAddField, setQuickAddField] = useState<string | null>(null)
+
+  function addAttributeToStore(attr: EditorAttribute): number {
+    const next = [...attributes, attr]
+    setData('attributes', next)
+    if (dirHandle) writeJsonFile(dirHandle, 'attributes.json', next).catch(console.error)
+    return attr.id
+  }
+
+  function addRaceToStore(race: EditorRace): number {
+    const next = [...races, race]
+    setData('races', next)
+    if (dirHandle) writeJsonFile(dirHandle, 'races.json', next).catch(console.error)
+    return race.id
+  }
 
   const cardId = parseInt(id ?? '0', 10)
   const card = data.cards.find((c) => c.id === cardId) ?? { id: cardId, type: 1, rarity: 1 } as EditorCard
@@ -115,15 +133,60 @@ export default function CardEditor() {
               onChange={(e) => patchCard({ def: parseInt(e.target.value) })} className={inputCls} />
           ))}
           {(isMonster || isEquipment) && field(t('card.attribute'), (
-            <select value={card.attribute ?? ''} onChange={(e) => patchCard({ attribute: parseInt(e.target.value) as EditorCard['attribute'] })} className={selCls}>
-              <option value="">— none —</option>
-              {ATTRIBUTES.map(({ v, l }) => <option key={v} value={v}>{l}</option>)}
-            </select>
+            <div>
+              <div className="flex gap-2">
+                <select
+                  value={card.attribute ?? ''}
+                  onChange={(e) => patchCard({ attribute: parseInt(e.target.value) || undefined })}
+                  className={`${selCls} flex-1`}
+                >
+                  <option value="">— none —</option>
+                  {attributes.map((a) => (
+                    <option key={a.id} value={a.id}>{a.value}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setQuickAddField(quickAddField === 'attribute' ? null : 'attribute')}
+                  className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                >+</button>
+              </div>
+              {quickAddField === 'attribute' && (
+                <QuickAddAttribute
+                  existingIds={attributes.map((a) => a.id)}
+                  onAdd={(attr) => { patchCard({ attribute: addAttributeToStore(attr) }); setQuickAddField(null) }}
+                  onCancel={() => setQuickAddField(null)}
+                />
+              )}
+            </div>
           ))}
           {(isMonster || isEquipment) && field(t('card.race'), (
-            <select value={card.race ?? ''} onChange={(e) => patchCard({ race: parseInt(e.target.value) })} className={selCls}>
-              {RACES.map((l, v) => v > 0 && <option key={v} value={v}>{l}</option>)}
-            </select>
+            <div>
+              <div className="flex gap-2">
+                <select
+                  value={card.race ?? ''}
+                  onChange={(e) => patchCard({ race: parseInt(e.target.value) || undefined })}
+                  className={`${selCls} flex-1`}
+                >
+                  <option value="">— none —</option>
+                  {races.map((r) => (
+                    <option key={r.id} value={r.id}>{r.value}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setQuickAddField(quickAddField === 'race' ? null : 'race')}
+                  className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                >+</button>
+              </div>
+              {quickAddField === 'race' && (
+                <QuickAddRace
+                  existingIds={races.map((r) => r.id)}
+                  onAdd={(race) => { patchCard({ race: addRaceToStore(race) }); setQuickAddField(null) }}
+                  onCancel={() => setQuickAddField(null)}
+                />
+              )}
+            </div>
           ))}
           {isEquipment && (
             <>
@@ -132,6 +195,62 @@ export default function CardEditor() {
               ))}
               {field('DEF Bonus', (
                 <input type="number" value={card.defBonus ?? 0} onChange={(e) => patchCard({ defBonus: parseInt(e.target.value) })} className={inputCls} />
+              ))}
+              {field('Equip Req. Attribute', (
+                <div>
+                  <div className="flex gap-2">
+                    <select
+                      value={card.equipReqAttr ?? ''}
+                      onChange={(e) => patchCard({ equipReqAttr: parseInt(e.target.value) || undefined })}
+                      className={`${selCls} flex-1`}
+                    >
+                      <option value="">— any —</option>
+                      {attributes.map((a) => (
+                        <option key={a.id} value={a.id}>{a.value}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddField(quickAddField === 'equipReqAttr' ? null : 'equipReqAttr')}
+                      className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                    >+</button>
+                  </div>
+                  {quickAddField === 'equipReqAttr' && (
+                    <QuickAddAttribute
+                      existingIds={attributes.map((a) => a.id)}
+                      onAdd={(attr) => { patchCard({ equipReqAttr: addAttributeToStore(attr) }); setQuickAddField(null) }}
+                      onCancel={() => setQuickAddField(null)}
+                    />
+                  )}
+                </div>
+              ))}
+              {field('Equip Req. Race', (
+                <div>
+                  <div className="flex gap-2">
+                    <select
+                      value={card.equipReqRace ?? ''}
+                      onChange={(e) => patchCard({ equipReqRace: parseInt(e.target.value) || undefined })}
+                      className={`${selCls} flex-1`}
+                    >
+                      <option value="">— any —</option>
+                      {races.map((r) => (
+                        <option key={r.id} value={r.id}>{r.value}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddField(quickAddField === 'equipReqRace' ? null : 'equipReqRace')}
+                      className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                    >+</button>
+                  </div>
+                  {quickAddField === 'equipReqRace' && (
+                    <QuickAddRace
+                      existingIds={races.map((r) => r.id)}
+                      onAdd={(race) => { patchCard({ equipReqRace: addRaceToStore(race) }); setQuickAddField(null) }}
+                      onCancel={() => setQuickAddField(null)}
+                    />
+                  )}
+                </div>
               ))}
             </>
           )}

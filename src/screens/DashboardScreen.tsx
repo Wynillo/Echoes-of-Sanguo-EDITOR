@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { FaArrowLeft, FaSpinner, FaFolderOpen } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
-  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiDragonHead,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import ValidationBanner, { useValidation } from '@/components/ValidationBanner'

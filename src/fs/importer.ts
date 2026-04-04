@@ -20,6 +20,7 @@ export async function importTcgResult(
     description: parsedById.get(c.id)?.description ?? '',
   }))
 
+  const typeMeta = (result as any).typeMeta
   await Promise.all([
     writeJsonFile(dir, 'cards.json', cards),
     writeJsonFile(dir, 'locales/en.json', cardLocales),
@@ -28,6 +29,8 @@ export async function importTcgResult(
     writeJsonFile(dir, 'shop.json', result.shopData ?? []),
     writeJsonFile(dir, 'fusion_formulas.json', result.fusionFormulas ?? []),
     ...(result.rules ? [writeJsonFile(dir, 'rules.json', result.rules)] : []),
+    ...(typeMeta?.attributes ? [writeJsonFile(dir, 'attributes.json', typeMeta.attributes)] : []),
+    ...(typeMeta?.races ? [writeJsonFile(dir, 'races.json', typeMeta.races)] : []),
     ...Array.from(result.rawImages.entries()).map(([id, buf]) =>
       writeBinaryFile(dir, `img/${id}.png`, buf)
     ),

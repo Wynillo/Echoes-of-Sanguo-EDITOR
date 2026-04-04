@@ -1,5 +1,7 @@
 import type { ProjectData, EditorCard, EditorCardLocale, EditorOpponent,
-  EditorCampaignChapter, EditorShopPack, EditorFusionFormula, EditorRules, EditorModInfo } from '../types/project'
+  EditorCampaignChapter, EditorShopPack, EditorFusionFormula, EditorRules, EditorModInfo,
+  EditorAttribute, EditorRace } from '../types/project'
+import { DEFAULT_ATTRIBUTES, DEFAULT_RACES } from '../stores/projectStore'
 
 async function readJson<T>(dir: FileSystemDirectoryHandle, filename: string, fallback: T): Promise<T> {
   try {
@@ -38,7 +40,7 @@ export async function readProjectFolder(dir: FileSystemDirectoryHandle): Promise
     description: '', minEngineVersion: '1.0.0', formatVersion: 2,
   }
 
-  const [cards, cardLocales, opponents, campaign, shop, fusion, rules, modInfo, images] = await Promise.all([
+  const [cards, cardLocales, opponents, campaign, shop, fusion, rules, modInfo, images, attributes, races] = await Promise.all([
     readJson<EditorCard[]>(dir, 'cards.json', []),
     // Try locales/en.json first (new format), fall back to cards_description.json (old format)
     readJson<EditorCardLocale[]>(dir, 'locales/en.json', []).then(
@@ -51,6 +53,8 @@ export async function readProjectFolder(dir: FileSystemDirectoryHandle): Promise
     readJson<EditorRules>(dir, 'rules.json', DEFAULT_RULES),
     readJson<EditorModInfo>(dir, 'mod.json', DEFAULT_MOD_INFO),
     readImages(dir),
+    readJson<EditorAttribute[]>(dir, 'attributes.json', DEFAULT_ATTRIBUTES),
+    readJson<EditorRace[]>(dir, 'races.json', DEFAULT_RACES),
   ])
-  return { cards, cardLocales, opponents, campaign, shop, fusion, rules, modInfo, images }
+  return { cards, cardLocales, opponents, campaign, shop, fusion, rules, modInfo, images, attributes, races }
 }
