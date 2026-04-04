@@ -27,7 +27,6 @@ export default function CardEditor() {
     const next = [...attributes, attr]
     setData('attributes', next)
     if (dirHandle) writeJsonFile(dirHandle, 'attributes.json', next).catch(console.error)
-    setQuickAddField(null)
     return attr.id
   }
 
@@ -35,7 +34,6 @@ export default function CardEditor() {
     const next = [...races, race]
     setData('races', next)
     if (dirHandle) writeJsonFile(dirHandle, 'races.json', next).catch(console.error)
-    setQuickAddField(null)
     return race.id
   }
 
@@ -149,7 +147,7 @@ export default function CardEditor() {
               {quickAddField === 'attribute' && (
                 <QuickAddAttribute
                   existingIds={attributes.map((a) => a.id)}
-                  onAdd={(attr) => patchCard({ attribute: addAttributeToStore(attr) })}
+                  onAdd={(attr) => { patchCard({ attribute: addAttributeToStore(attr) }); setQuickAddField(null) }}
                   onCancel={() => setQuickAddField(null)}
                 />
               )}
@@ -177,7 +175,7 @@ export default function CardEditor() {
               {quickAddField === 'race' && (
                 <QuickAddRace
                   existingIds={races.map((r) => r.id)}
-                  onAdd={(race) => patchCard({ race: addRaceToStore(race) })}
+                  onAdd={(race) => { patchCard({ race: addRaceToStore(race) }); setQuickAddField(null) }}
                   onCancel={() => setQuickAddField(null)}
                 />
               )}
@@ -213,7 +211,7 @@ export default function CardEditor() {
                   {quickAddField === 'equipReqAttr' && (
                     <QuickAddAttribute
                       existingIds={attributes.map((a) => a.id)}
-                      onAdd={(attr) => patchCard({ equipReqAttr: addAttributeToStore(attr) })}
+                      onAdd={(attr) => { patchCard({ equipReqAttr: addAttributeToStore(attr) }); setQuickAddField(null) }}
                       onCancel={() => setQuickAddField(null)}
                     />
                   )}
@@ -241,7 +239,7 @@ export default function CardEditor() {
                   {quickAddField === 'equipReqRace' && (
                     <QuickAddRace
                       existingIds={races.map((r) => r.id)}
-                      onAdd={(race) => patchCard({ equipReqRace: addRaceToStore(race) })}
+                      onAdd={(race) => { patchCard({ equipReqRace: addRaceToStore(race) }); setQuickAddField(null) }}
                       onCancel={() => setQuickAddField(null)}
                     />
                   )}
