@@ -1,14 +1,27 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
-import type { EditorFusionFormula } from '../types/project'
-
-const RACES = ['', 'Dragon', 'Spellcaster', 'Warrior', 'Beast', 'Plant', 'Rock', 'Phoenix', 'Undead', 'Aqua', 'Insect', 'Machine', 'Pyro']
+import type { EditorFusionFormula, EditorRace } from '../types/project'
+import QuickAddRace from '../components/QuickAddRace'
 
 export default function FusionEditor() {
   const navigate = useNavigate()
   const { data, dirHandle, setData } = useProjectStore()
   const formulas = data.fusion
+  const races = data.races
+  const [quickAddOpen, setQuickAddOpen] = useState<string | null>(null)
+
+  function addRaceToStore(race: EditorRace, formulaId: string, operandIndex: 0 | 1) {
+    const nextRaces = [...races, race]
+    setData('races', nextRaces)
+    if (dirHandle) writeJsonFile(dirHandle, 'races.json', nextRaces).catch(console.error)
+    const formula = formulas.find((f) => f.id === formulaId)!
+    const newOperands: [number, number] = [formula.operands[0], formula.operands[1]]
+    newOperands[operandIndex] = race.id
+    patch(formulaId, { operands: newOperands })
+    setQuickAddOpen(null)
+  }
 
   function save(next: EditorFusionFormula[]) {
     setData('fusion', next)
@@ -52,13 +65,57 @@ export default function FusionEditor() {
           <div key={f.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
             <div className="flex items-center gap-4 mb-3">
               <div className="flex items-center gap-2 flex-1">
-                <select value={f.operands[0]} onChange={(e) => patch(f.id, { operands: [parseInt(e.target.value), f.operands[1]] })} className={selCls}>
-                  {RACES.map((r, v) => v > 0 && <option key={v} value={v}>{r}</option>)}
-                </select>
+                <div>
+                  <div className="flex gap-1">
+                    <select
+                      value={f.operands[0]}
+                      onChange={(e) => patch(f.id, { operands: [parseInt(e.target.value), f.operands[1]] })}
+                      className={selCls}
+                    >
+                      {races.map((r) => (
+                        <option key={r.id} value={r.id}>{r.value}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddOpen(quickAddOpen === `${f.id}-0` ? null : `${f.id}-0`)}
+                      className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                    >+</button>
+                  </div>
+                  {quickAddOpen === `${f.id}-0` && (
+                    <QuickAddRace
+                      existingIds={races.map((r) => r.id)}
+                      onAdd={(race) => addRaceToStore(race, f.id, 0)}
+                      onCancel={() => setQuickAddOpen(null)}
+                    />
+                  )}
+                </div>
                 <span className="text-gray-400">+</span>
-                <select value={f.operands[1]} onChange={(e) => patch(f.id, { operands: [f.operands[0], parseInt(e.target.value)] })} className={selCls}>
-                  {RACES.map((r, v) => v > 0 && <option key={v} value={v}>{r}</option>)}
-                </select>
+                <div>
+                  <div className="flex gap-1">
+                    <select
+                      value={f.operands[1]}
+                      onChange={(e) => patch(f.id, { operands: [f.operands[0], parseInt(e.target.value)] })}
+                      className={selCls}
+                    >
+                      {races.map((r) => (
+                        <option key={r.id} value={r.id}>{r.value}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setQuickAddOpen(quickAddOpen === `${f.id}-1` ? null : `${f.id}-1`)}
+                      className="bg-gray-700 hover:bg-gray-600 px-2 rounded text-sm"
+                    >+</button>
+                  </div>
+                  {quickAddOpen === `${f.id}-1` && (
+                    <QuickAddRace
+                      existingIds={races.map((r) => r.id)}
+                      onAdd={(race) => addRaceToStore(race, f.id, 1)}
+                      onCancel={() => setQuickAddOpen(null)}
+                    />
+                  )}
+                </div>
                 <span className="text-gray-400">→</span>
                 <div>
                   <label className="text-xs text-gray-400 block mb-1">Priority</label>
