@@ -1,9 +1,25 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { FaArrowLeft } from 'react-icons/fa6'
+import {
+  GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
+} from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import { useState } from 'react'
 
 const CARD_TYPE_LABELS = ['All', 'Monster', 'Fusion', 'Spell', 'Trap', 'Equipment']
+
+const SECTION_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  cards: GiCardPick,
+  opponents: GiSwordman,
+  campaign: GiScrollUnfurled,
+  shop: GiShop,
+  fusion: GiChemicalDrop,
+  rules: GiScrollQuill,
+  localization: GiWorld,
+  modinfo: GiInfo,
+}
 
 export default function SectionListScreen() {
   const { section } = useParams<{ section: string }>()
@@ -33,23 +49,28 @@ export default function SectionListScreen() {
     return true
   })
 
+  const SectionIcon = SECTION_ICONS[section ?? ''] ?? GiCardPick
+
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="text-gray-400 hover:text-white text-sm">
-          ← {t(`section.${section}`)}
+        <button
+          onClick={() => navigate('/project')}
+          className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5"
+        >
+          <FaArrowLeft size={12} /> {t(`section.${section}`)}
         </button>
         <div className="ml-auto flex gap-2">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('list.search')}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm"
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-violet-500/50"
           />
           <button
             onClick={() => navigate(`/project/${section}/new`)}
-            className="bg-indigo-700 hover:bg-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold"
+            className="cursor-pointer bg-violet-700 hover:bg-violet-600 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors"
           >
             + {t('list.new')}
           </button>
@@ -63,8 +84,8 @@ export default function SectionListScreen() {
             <button
               key={label}
               onClick={() => setTypeFilter(i)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                typeFilter === i ? 'bg-indigo-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+              className={`cursor-pointer px-3 py-1 rounded-full text-sm transition-colors ${
+                typeFilter === i ? 'bg-violet-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
               {label}
@@ -84,20 +105,38 @@ export default function SectionListScreen() {
               onClick={() => navigate(`/project/${section}/${id}`)}
               className={
                 section === 'cards'
-                  ? 'bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-lg p-3 text-left text-sm transition-colors'
-                  : 'bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-left text-sm transition-colors'
+                  ? 'cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-lg p-3 text-left text-sm transition-colors'
+                  : 'cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-left text-sm transition-colors'
               }
             >
-              <div className="font-medium truncate">{getLabel(typedItem)}</div>
-              {section === 'cards' && (
-                <div className="text-xs text-gray-400 mt-1">
-                  ATK {String(typedItem['atk'] ?? '—')}
-                </div>
+              {section === 'cards' ? (
+                <>
+                  <div className="font-medium truncate text-xs">{getLabel(typedItem)}</div>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-xs text-slate-500">{CARD_TYPE_LABELS[typedItem['type'] as number] ?? ''}</span>
+                    <span className="text-xs text-slate-400">{typedItem['atk'] != null ? `ATK ${typedItem['atk']}` : ''}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="font-medium truncate">{getLabel(typedItem)}</div>
               )}
             </button>
           )
         })}
       </div>
+
+      {/* Empty state */}
+      {filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <SectionIcon size={48} className="text-slate-700 mb-4" />
+          <p className="text-slate-400 font-medium">
+            {search ? 'No results match your search' : `No ${section} yet`}
+          </p>
+          <p className="text-slate-600 text-sm mt-1">
+            {search ? 'Try a different search term' : 'Click "+ New" to add the first one'}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

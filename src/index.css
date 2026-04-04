@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+:root {
+  --color-primary:   #7C3AED;
+  --color-primary-h: #6D28D9;
+  --color-accent:    #0891B2;
+  --color-accent-h:  #0E7490;
+  --color-border:    rgba(255,255,255,0.08);
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
