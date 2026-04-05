@@ -25,3 +25,8 @@ dist-ssr
 
 coverage/
 .vitest/
+
+# AI assistant configs
+.claude/
+.superpowers/
+docs/superpowers/
