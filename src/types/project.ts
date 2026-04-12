@@ -17,11 +17,42 @@ export interface EditorCard {
   effects?: Array<{ trigger: string; actions: string[] }>
 }
 
+/** @deprecated Use locales system instead */
 export interface EditorCardLocale {
   id: number
   name: string
   description: string
 }
+
+// --- Locale system (matches MOD-base format) ---
+
+export interface LocaleData {
+  common: Record<string, string>
+  cards: Record<string, { name: string; description: string }>
+  opponents: Record<string, { name: string; title: string; flavor: string }>
+  shop: Record<string, { name: string; desc: string }>
+  campaign: Record<string, string>
+  races: Record<string, string>
+  attributes: Record<string, string>
+}
+
+// --- Currency ---
+
+export interface EditorCurrency {
+  id: string
+  nameKey: string
+  icon: string
+  requiredChapter?: number
+}
+
+// --- Starter Deck ---
+
+export interface EditorStarterDeck {
+  raceId: number
+  cardIds: number[]
+}
+
+// --- Opponent ---
 
 export interface EditorOpponent {
   id: number
@@ -30,18 +61,22 @@ export interface EditorOpponent {
   coinsLoss: number
   deckIds: number[]
   behavior: 'default' | 'smart' | 'aggressive' | 'defensive' | 'cheating'
-  name: string
-  title: string
-  flavor: string
+  currencyId?: string
+  unlockCondition?: string
 }
+
+// --- Campaign ---
 
 export interface EditorCampaignNode {
   id: string
-  type: 'duel' | 'story' | 'reward' | 'shop' | 'branch'
+  type: 'duel' | 'duel_elite' | 'boss' | 'story' | 'reward' | 'shop' | 'branch' | 'rest' | 'treasure' | 'gauntlet'
+  opponentId?: number
+  opponentSequence?: number[]
+  isBoss?: boolean
   storyId?: string
-  duels?: number[]
-  unlockConditions?: unknown[]
-  rewards?: unknown[]
+  unlockCondition?: unknown
+  rewards?: unknown
+  position?: { x: number; y: number }
 }
 
 export interface EditorCampaignChapter {
@@ -50,14 +85,19 @@ export interface EditorCampaignChapter {
   nodes: EditorCampaignNode[]
 }
 
+// --- Shop ---
+
 export interface EditorShopPack {
   id: string
   name: string
   cost: number
   drawCount: number
   cardPool: number[]
+  currencyId?: string
   unlockCondition?: string
 }
+
+// --- Fusion ---
 
 export interface EditorFusionFormula {
   id: string
@@ -65,6 +105,8 @@ export interface EditorFusionFormula {
   resultPool: number[]
   priority: number
 }
+
+// --- Rules ---
 
 export interface EditorRules {
   startingLP: number
@@ -74,6 +116,8 @@ export interface EditorRules {
   cardsDrawPerTurn: number
   handLimit: number
 }
+
+// --- Mod Info ---
 
 export interface EditorModInfo {
   id: string
@@ -85,6 +129,8 @@ export interface EditorModInfo {
   minEngineVersion: string
   formatVersion: number
 }
+
+// --- Attribute & Race ---
 
 export interface EditorAttribute {
   id: number
@@ -103,10 +149,12 @@ export interface EditorRace {
   emoji?: string
 }
 
+// --- Project Data ---
+
 export interface ProjectData {
   modInfo: EditorModInfo
   cards: EditorCard[]
-  cardLocales: EditorCardLocale[]   // locales/en.json content
+  locales: Record<string, LocaleData>
   opponents: EditorOpponent[]
   campaign: EditorCampaignChapter[]
   shop: EditorShopPack[]
@@ -114,6 +162,7 @@ export interface ProjectData {
   rules: EditorRules
   attributes: EditorAttribute[]
   races: EditorRace[]
-  // image blobs keyed by card id (loaded from img/)
+  currencies: EditorCurrency[]
+  starterDecks: EditorStarterDeck[]
   images: Record<number, Blob>
 }

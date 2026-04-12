@@ -47,7 +47,7 @@ export default function FusionEditor() {
     save(formulas.filter((f) => f.id !== id))
   }
 
-  const getName = (cardId: number) => data.cardLocales.find((l) => l.id === cardId)?.name ?? `Card ${cardId}`
+  const getName = (cardId: number) => data.locales.en?.cards[String(cardId)]?.name ?? `Card ${cardId}`
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
   const selCls = inputCls

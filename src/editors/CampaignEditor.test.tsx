@@ -5,7 +5,7 @@ import CampaignEditor from './CampaignEditor'
 
 beforeEach(() => useProjectStore.getState().load({
   campaign: [{ id: 'ch1', title: 'Chapter One', nodes: [
-    { id: 'n1', type: 'duel', duels: [1], unlockConditions: [], rewards: [] }
+    { id: 'n1', type: 'duel', opponentId: 1, rewards: [] }
   ]}],
 } as any, null))
 

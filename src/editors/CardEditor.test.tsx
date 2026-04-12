@@ -5,7 +5,7 @@ import CardEditor from './CardEditor'
 
 beforeEach(() => useProjectStore.getState().load({
   cards: [{ id: 1, type: 1, rarity: 1, atk: 1000, def: 800 }],
-  cardLocales: [{ id: 1, name: 'Test Card', description: 'A test.' }],
+  locales: { en: { common: {}, cards: { '1': { name: 'Test Card', description: 'A test.' } }, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
 } as any, null))
 
 it('shows card name in input', () => {

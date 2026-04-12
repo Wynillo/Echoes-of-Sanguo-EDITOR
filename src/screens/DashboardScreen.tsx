@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FaArrowLeft, FaSpinner, FaFolderOpen } from 'react-icons/fa6'
+import { FaArrowLeft, FaSpinner, FaFolderOpen, FaCheck, FaTriangleExclamation } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
-  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiDragonHead,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiTwoCoins, GiCardJoker,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import ValidationBanner, { useValidation } from '@/components/ValidationBanner'
@@ -16,14 +16,17 @@ const SECTIONS = [
   { key: 'campaign',     dataKey: 'campaign',     icon: GiScrollUnfurled,  labelKey: 'section.campaign',     color: 'text-emerald-400' },
   { key: 'shop',         dataKey: 'shop',         icon: GiShop,            labelKey: 'section.shop',         color: 'text-yellow-400' },
   { key: 'fusion',       dataKey: 'fusion',       icon: GiChemicalDrop,    labelKey: 'section.fusion',       color: 'text-purple-400' },
+  { key: 'starterdecks', dataKey: 'starterDecks', icon: GiCardJoker,       labelKey: 'section.starterdecks', color: 'text-cyan-400' },
+  { key: 'currencies',   dataKey: 'currencies',   icon: GiTwoCoins,        labelKey: 'section.currencies',   color: 'text-orange-400' },
   { key: 'rules',        dataKey: 'rules',        icon: GiScrollQuill,     labelKey: 'section.rules',        color: 'text-blue-400' },
-  { key: 'localization', dataKey: 'cardLocales',  icon: GiWorld,           labelKey: 'section.localization', color: 'text-teal-400' },
+  { key: 'localization', dataKey: 'locales',      icon: GiWorld,           labelKey: 'section.localization', color: 'text-teal-400' },
   { key: 'modinfo',      dataKey: 'modInfo',      icon: GiInfo,            labelKey: 'section.modinfo',      color: 'text-slate-300' },
 ] as const
 
 function sectionCount(data: Record<string, unknown>, key: string): number | null {
   const val = data[key]
   if (Array.isArray(val)) return val.length
+  if (key === 'locales' && typeof val === 'object' && val !== null) return Object.keys(val).length
   return null
 }
 
@@ -31,7 +34,7 @@ export default function DashboardScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { data, dirHandle, setDirHandle } = useProjectStore()
-  const { hasErrors } = useValidation()
+  const { hasErrors, errors, warnings } = useValidation()
   const [exporting, setExporting] = useState(false)
 
   async function handleConnectFolder() {
@@ -43,15 +46,32 @@ export default function DashboardScreen() {
     }
   }
 
+  const completeness = errors.length === 0 && warnings.length === 0
+    ? 'complete'
+    : errors.length === 0
+      ? 'warnings'
+      : 'errors'
+
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">{data.modInfo.name || 'Untitled MOD'}</h1>
-          <p className="text-sm text-gray-400">
-            v{data.modInfo.version} · {data.modInfo.author}
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">{data.modInfo.name || 'Untitled MOD'}</h1>
+            <p className="text-sm text-gray-400">
+              v{data.modInfo.version} · {data.modInfo.author}
+            </p>
+          </div>
+          {/* Completeness indicator */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+            completeness === 'complete' ? 'bg-green-900/50 text-green-400 border border-green-700/50' :
+            completeness === 'warnings' ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-700/50' :
+            'bg-red-900/50 text-red-400 border border-red-700/50'
+          }`}>
+            {completeness === 'complete' ? <FaCheck size={10} /> : <FaTriangleExclamation size={10} />}
+            {completeness === 'complete' ? 'Ready' : completeness === 'warnings' ? `${warnings.length} warnings` : `${errors.length} errors`}
+          </div>
         </div>
         <div className="flex gap-3 items-center">
           <button

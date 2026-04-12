@@ -5,7 +5,8 @@ import ShopEditor from './ShopEditor'
 
 beforeEach(() => useProjectStore.getState().load({
   shop: [{ id: 'p1', name: 'Starter Pack', cost: 100, drawCount: 5, cardPool: [] }],
-  cards: [], cardLocales: [],
+  cards: [],
+  locales: { en: { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
 } as any, null))
 
 it('renders pack name', () => {

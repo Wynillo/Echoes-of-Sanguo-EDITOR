@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import type { ProjectData, EditorCard, EditorAttribute, EditorRace } from '../types/project'
+import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
+import { createEmptyLocaleData } from '../utils/localeHelpers'
 
 const DEFAULT_RULES = {
   startingLP: 8000, maxFieldZones: 5, deckSize: 40,
@@ -33,11 +34,15 @@ export const DEFAULT_RACES: EditorRace[] = [
 const EMPTY_DATA: ProjectData = {
   modInfo: { id: '', name: '', version: '1.0.0', author: '', type: 'expansion',
     description: '', minEngineVersion: '1.0.0', formatVersion: 2 },
-  cards: [], cardLocales: [], opponents: [],
+  cards: [],
+  locales: { en: createEmptyLocaleData() },
+  opponents: [],
   campaign: [], shop: [], fusion: [],
   rules: DEFAULT_RULES,
   attributes: DEFAULT_ATTRIBUTES,
   races: DEFAULT_RACES,
+  currencies: [],
+  starterDecks: [],
   images: {},
 }
 
@@ -51,6 +56,7 @@ interface ProjectStore {
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
   setDirHandle: (dir: FileSystemDirectoryHandle) => void
+  setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
 }
 
 export const useProjectStore = create<ProjectStore>((set) => ({
@@ -78,4 +84,21 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   setData: (key, value) => set((s) => ({ data: { ...s.data, [key]: value } })),
 
   setDirHandle: (dir) => set({ dirHandle: dir }),
+
+  setLocaleField: (lang, domain, key, value) => set((s) => {
+    const langData = s.data.locales[lang] ?? createEmptyLocaleData()
+    const domainData = langData[domain] as Record<string, unknown>
+    return {
+      data: {
+        ...s.data,
+        locales: {
+          ...s.data.locales,
+          [lang]: {
+            ...langData,
+            [domain]: { ...domainData, [key]: value },
+          },
+        },
+      },
+    }
+  }),
 }))

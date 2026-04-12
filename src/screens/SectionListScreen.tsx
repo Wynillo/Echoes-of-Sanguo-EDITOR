@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { FaArrowLeft } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
-  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiCardJoker, GiTwoCoins,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import { useState } from 'react'
@@ -19,6 +19,8 @@ const SECTION_ICONS: Record<string, React.ComponentType<{ size?: number; classNa
   rules: GiScrollQuill,
   localization: GiWorld,
   modinfo: GiInfo,
+  starterdecks: GiCardJoker,
+  currencies: GiTwoCoins,
 }
 
 export default function SectionListScreen() {
@@ -29,17 +31,30 @@ export default function SectionListScreen() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState(0) // 0 = All
 
-  const items: unknown[] = (data as unknown as Record<string, unknown>)[section === 'localization' ? 'cardLocales' : section === 'modinfo' ? [] as any : section ?? ''] as unknown[] ?? []
-  const cardLocales = data.cardLocales
+  function getItems(): unknown[] {
+    if (section === 'modinfo') return []
+    if (section === 'localization') return data.cards // Show cards in localization view
+    if (section === 'starterdecks') return data.starterDecks
+    if (section === 'currencies') return data.currencies
+    return ((data as unknown as Record<string, unknown>)[section ?? ''] as unknown[]) ?? []
+  }
+  const items = getItems()
 
   function getLabel(item: Record<string, unknown>): string {
     if (section === 'cards' || section === 'localization') {
-      return (cardLocales.find((l) => l.id === item['id'])?.name ?? `Card ${item['id']}`) as string
+      return data.locales.en?.cards[String(item['id'])]?.name ?? `Card ${item['id']}`
     }
-    if (section === 'opponents') return (item['name'] as string) ?? `Opponent ${item['id']}`
+    if (section === 'opponents') {
+      return data.locales.en?.opponents[String(item['id'])]?.name ?? `Opponent ${item['id']}`
+    }
     if (section === 'campaign') return (item['title'] as string) ?? String(item['id'])
     if (section === 'shop') return (item['name'] as string) ?? String(item['id'])
     if (section === 'fusion') return String(item['id'])
+    if (section === 'starterdecks') {
+      const race = data.races.find(r => r.id === item['raceId'])
+      return race?.value ?? `Race ${item['raceId']}`
+    }
+    if (section === 'currencies') return (item['id'] as string) ?? 'Currency'
     return String(item['id'] ?? item)
   }
 

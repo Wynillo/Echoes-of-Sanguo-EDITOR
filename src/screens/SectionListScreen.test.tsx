@@ -7,7 +7,7 @@ import '../i18n'
 beforeEach(() => {
   useProjectStore.getState().load({
     cards: [{ id: 1, type: 1, rarity: 1, atk: 2400 } as any],
-    cardLocales: [{ id: 1, name: 'Red Dragon', description: '' }],
+    locales: { en: { common: {}, cards: { '1': { name: 'Red Dragon', description: '' } }, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
   } as any, null)
 })
 

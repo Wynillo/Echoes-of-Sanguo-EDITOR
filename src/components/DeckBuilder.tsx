@@ -13,7 +13,7 @@ export default function DeckBuilder({ value, onChange, label }: Props) {
   const { data } = useProjectStore()
 
   function getName(id: number) {
-    return data.cardLocales.find((l) => l.id === id)?.name ?? `Card ${id}`
+    return data.locales.en?.cards[String(id)]?.name ?? `Card ${id}`
   }
 
   const available = data.cards
