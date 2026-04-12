@@ -5,7 +5,14 @@ import { useProjectStore } from '../stores/projectStore'
 import { writeJsonFile } from '../fs/writer'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
 
-const NODE_TYPES = ['duel', 'story', 'reward', 'shop', 'branch'] as const
+const NODE_TYPES = ['duel', 'duel_elite', 'boss', 'story', 'reward', 'shop', 'branch', 'rest', 'treasure', 'gauntlet'] as const
+
+const NODE_TYPE_COLORS: Record<string, string> = {
+  duel: 'bg-red-700', duel_elite: 'bg-orange-700', boss: 'bg-red-900',
+  story: 'bg-blue-700', reward: 'bg-yellow-700', shop: 'bg-green-700',
+  branch: 'bg-purple-700', rest: 'bg-teal-700', treasure: 'bg-amber-700',
+  gauntlet: 'bg-rose-700',
+}
 
 export default function CampaignEditor() {
   const navigate = useNavigate()
@@ -14,7 +21,6 @@ export default function CampaignEditor() {
     data.campaign[0]?.id ?? null
   )
   const [expandedNodeId, setExpandedNodeId] = useState<string | null>(null)
-  // Local draft state for JSON fields keyed by `nodeId:field`
   const [jsonDrafts, setJsonDrafts] = useState<Record<string, string>>({})
   const [jsonErrors, setJsonErrors] = useState<Record<string, boolean>>({})
 
@@ -48,9 +54,6 @@ export default function CampaignEditor() {
     const node: EditorCampaignNode = {
       id: `node-${Date.now()}`,
       type: 'duel',
-      duels: [],
-      unlockConditions: [],
-      rewards: [],
     }
     updateChapter(selectedChapter.id, { nodes: [...selectedChapter.nodes, node] })
   }
@@ -81,7 +84,7 @@ export default function CampaignEditor() {
     }
   }
 
-  function commitJson(chapterId: string, nodeId: string, field: 'rewards' | 'unlockConditions') {
+  function commitJson(chapterId: string, nodeId: string, field: 'rewards' | 'unlockCondition') {
     const key = `${nodeId}:${field}`
     const text = jsonDrafts[key]
     if (text === undefined || jsonErrors[key]) return
@@ -92,10 +95,20 @@ export default function CampaignEditor() {
 
   function getJsonValue(nodeId: string, field: string, stored: unknown) {
     const key = `${nodeId}:${field}`
-    return jsonDrafts[key] ?? JSON.stringify(stored ?? [], null, 2)
+    return jsonDrafts[key] ?? JSON.stringify(stored ?? null, null, 2)
+  }
+
+  // Gauntlet opponent sequence helpers
+  function addToSequence(chapterId: string, nodeId: string, node: EditorCampaignNode, oppId: number) {
+    updateNode(chapterId, nodeId, { opponentSequence: [...(node.opponentSequence ?? []), oppId] })
+  }
+
+  function removeFromSequence(chapterId: string, nodeId: string, node: EditorCampaignNode, idx: number) {
+    updateNode(chapterId, nodeId, { opponentSequence: (node.opponentSequence ?? []).filter((_, i) => i !== idx) })
   }
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
+  const getOppName = (id: number) => data.locales.en?.opponents[String(id)]?.name ?? `Opponent ${id}`
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
@@ -146,7 +159,7 @@ export default function CampaignEditor() {
                 <div key={node.id} className="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
                   <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800"
                     onClick={() => setExpandedNodeId(expandedNodeId === node.id ? null : node.id)}>
-                    <span className="text-xs bg-gray-700 px-2 py-0.5 rounded font-mono">{node.type}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded font-mono text-white ${NODE_TYPE_COLORS[node.type] ?? 'bg-gray-700'}`}>{node.type}</span>
                     <span className="text-sm flex-1">{node.id}</span>
                     <span className="text-gray-500">{expandedNodeId === node.id ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}</span>
                     <button onClick={(e) => { e.stopPropagation(); deleteNode(selectedChapter.id, node.id) }}
@@ -174,14 +187,66 @@ export default function CampaignEditor() {
                           </select>
                         </div>
                       </div>
-                      {(node.type === 'duel' || node.type === 'branch') && (
+
+                      {/* Duel/Boss/Elite fields */}
+                      {(node.type === 'duel' || node.type === 'duel_elite' || node.type === 'boss') && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Opponent</label>
+                            <select value={node.opponentId ?? ''}
+                              onChange={(e) => updateNode(selectedChapter.id, node.id, { opponentId: parseInt(e.target.value) || undefined })}
+                              className={`${inputCls} w-full`}>
+                              <option value="">— select —</option>
+                              {data.opponents.map((o) => <option key={o.id} value={o.id}>{getOppName(o.id)}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-400 mb-1 block">Is Boss?</label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" checked={node.isBoss ?? false}
+                                onChange={(e) => updateNode(selectedChapter.id, node.id, { isBoss: e.target.checked })} />
+                              <span className="text-sm">{node.isBoss ? 'Yes' : 'No'}</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Gauntlet: opponent sequence */}
+                      {node.type === 'gauntlet' && (
+                        <div>
+                          <label className="text-xs text-gray-400 mb-1 block">Opponent Sequence</label>
+                          <div className="flex flex-col gap-1 mb-2">
+                            {(node.opponentSequence ?? []).map((oppId, i) => (
+                              <div key={i} className="flex items-center gap-2 bg-gray-800 rounded px-2 py-1">
+                                <span className="text-xs text-gray-500">{i + 1}.</span>
+                                <span className="text-sm flex-1">{getOppName(oppId)}</span>
+                                <button onClick={() => removeFromSequence(selectedChapter.id, node.id, node, i)}
+                                  className="cursor-pointer text-red-400 hover:text-red-300 transition-colors"><FaXmark size={10} /></button>
+                              </div>
+                            ))}
+                          </div>
+                          <select onChange={(e) => {
+                            const val = parseInt(e.target.value)
+                            if (!isNaN(val)) addToSequence(selectedChapter.id, node.id, node, val)
+                            e.target.value = ''
+                          }} className={`${inputCls} w-48`} defaultValue="">
+                            <option value="">Add opponent...</option>
+                            {data.opponents.map((o) => <option key={o.id} value={o.id}>{getOppName(o.id)}</option>)}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Story ID (for story/branch/duel types) */}
+                      {(node.type === 'story' || node.type === 'branch' || node.type === 'duel' || node.type === 'duel_elite' || node.type === 'boss') && (
                         <div>
                           <label className="text-xs text-gray-400 mb-1 block">Story ID</label>
                           <input value={node.storyId ?? ''}
-                            onChange={(e) => updateNode(selectedChapter.id, node.id, { storyId: e.target.value })}
+                            onChange={(e) => updateNode(selectedChapter.id, node.id, { storyId: e.target.value || undefined })}
                             className={`${inputCls} w-full`} placeholder="story_id_key" />
                         </div>
                       )}
+
+                      {/* Rewards JSON */}
                       <div>
                         <label className="text-xs text-gray-400 mb-1 block">
                           Rewards (JSON){jsonErrors[`${node.id}:rewards`] && <span className="text-red-400 ml-2">invalid JSON</span>}
@@ -193,15 +258,17 @@ export default function CampaignEditor() {
                           className={`${inputCls} w-full font-mono text-xs ${jsonErrors[`${node.id}:rewards`] ? 'border-red-500' : ''}`}
                           rows={3} />
                       </div>
+
+                      {/* Unlock Condition JSON */}
                       <div>
                         <label className="text-xs text-gray-400 mb-1 block">
-                          Unlock Conditions (JSON){jsonErrors[`${node.id}:unlockConditions`] && <span className="text-red-400 ml-2">invalid JSON</span>}
+                          Unlock Condition (JSON){jsonErrors[`${node.id}:unlockCondition`] && <span className="text-red-400 ml-2">invalid JSON</span>}
                         </label>
                         <textarea
-                          value={getJsonValue(node.id, 'unlockConditions', node.unlockConditions)}
-                          onChange={(e) => handleJsonChange(node.id, 'unlockConditions', e.target.value)}
-                          onBlur={() => commitJson(selectedChapter.id, node.id, 'unlockConditions')}
-                          className={`${inputCls} w-full font-mono text-xs ${jsonErrors[`${node.id}:unlockConditions`] ? 'border-red-500' : ''}`}
+                          value={getJsonValue(node.id, 'unlockCondition', node.unlockCondition)}
+                          onChange={(e) => handleJsonChange(node.id, 'unlockCondition', e.target.value)}
+                          onBlur={() => commitJson(selectedChapter.id, node.id, 'unlockCondition')}
+                          className={`${inputCls} w-full font-mono text-xs ${jsonErrors[`${node.id}:unlockCondition`] ? 'border-red-500' : ''}`}
                           rows={3} />
                       </div>
                     </div>

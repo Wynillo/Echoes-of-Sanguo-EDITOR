@@ -8,6 +8,8 @@ import RulesEditor from '@/editors/RulesEditor'
 import LocalizationEditor from '@/editors/LocalizationEditor'
 import ModInfoEditor from '@/editors/ModInfoEditor'
 import GameDataEditor from '@/editors/GameDataEditor'
+import StarterDecksEditor from '@/editors/StarterDecksEditor'
+import CurrencyEditor from '@/editors/CurrencyEditor'
 
 const EDITORS: Record<string, React.ComponentType> = {
   cards: CardEditor,
@@ -19,6 +21,8 @@ const EDITORS: Record<string, React.ComponentType> = {
   localization: LocalizationEditor,
   modinfo: ModInfoEditor,
   gamedata: GameDataEditor,
+  starterdecks: StarterDecksEditor,
+  currencies: CurrencyEditor,
 }
 
 export default function DetailScreen() {

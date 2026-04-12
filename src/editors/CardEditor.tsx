@@ -9,7 +9,8 @@ import ImagePicker from '../components/ImagePicker'
 import EffectPicker from '../components/EffectPicker'
 import QuickAddAttribute from '../components/QuickAddAttribute'
 import QuickAddRace from '../components/QuickAddRace'
-import type { EditorCard, EditorCardLocale, EditorAttribute, EditorRace } from '../types/project'
+import type { EditorCard, EditorAttribute, EditorRace } from '../types/project'
+import { getCardName, getCardDescription } from '../utils/localeHelpers'
 
 const CARD_TYPES = ['', 'Monster', 'Fusion', 'Spell', 'Trap', 'Equipment']
 const RARITIES = [{ v: 1, l: 'Common' }, { v: 2, l: 'Uncommon' }, { v: 4, l: 'Rare' }, { v: 6, l: 'SuperRare' }, { v: 8, l: 'UltraRare' }]
@@ -40,7 +41,11 @@ export default function CardEditor() {
 
   const cardId = parseInt(id ?? '0', 10)
   const card = data.cards.find((c) => c.id === cardId) ?? { id: cardId, type: 1, rarity: 1 } as EditorCard
-  const locale = data.cardLocales.find((l) => l.id === cardId) ?? { id: cardId, name: '', description: '' }
+  const locale = {
+    id: cardId,
+    name: getCardName(data.locales, 'en', cardId),
+    description: getCardDescription(data.locales, 'en', cardId),
+  }
   const image = data.images[cardId] ?? null
   const isMonster = card.type === 1 || card.type === 2
   const isEquipment = card.type === 5
@@ -51,10 +56,18 @@ export default function CardEditor() {
     if (dirHandle) writeJsonFile(dirHandle, 'cards.json', data.cards.map(c => c.id === cardId ? { ...c, ...patch } : c)).catch(console.error)
   }
 
-  function patchLocale(patch: Partial<EditorCardLocale>) {
-    const next = data.cardLocales.map(l => l.id === cardId ? { ...l, ...patch } : l)
-    setData('cardLocales', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'locales/en.json', next).catch(console.error)
+  function patchLocale(patch: { name?: string; description?: string }) {
+    const current = data.locales.en?.cards[String(cardId)] ?? { name: '', description: '' }
+    const updated = { ...current, ...patch }
+    const nextLocales = {
+      ...data.locales,
+      en: {
+        ...(data.locales.en ?? { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} }),
+        cards: { ...data.locales.en?.cards, [String(cardId)]: updated },
+      },
+    }
+    setData('locales', nextLocales)
+    if (dirHandle) writeJsonFile(dirHandle, 'locales/en.json', nextLocales.en).catch(console.error)
   }
 
   function patchImage(blob: Blob) {
@@ -64,7 +77,14 @@ export default function CardEditor() {
   function handleDelete() {
     if (!confirm(t('editor.confirm_delete'))) return
     setData('cards', data.cards.filter(c => c.id !== cardId))
-    setData('cardLocales', data.cardLocales.filter(l => l.id !== cardId))
+    // Remove locale entry for this card
+    const nextCards = { ...data.locales.en?.cards }
+    delete nextCards[String(cardId)]
+    const nextLocales = {
+      ...data.locales,
+      en: { ...(data.locales.en ?? { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} }), cards: nextCards },
+    }
+    setData('locales', nextLocales)
     navigate('/project/cards')
   }
 

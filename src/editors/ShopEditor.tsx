@@ -12,7 +12,7 @@ export default function ShopEditor() {
 
   function save(next: EditorShopPack[]) {
     setData('shop', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'shop.json', next).catch(console.error)
+    if (dirHandle) writeJsonFile(dirHandle, 'shop.json', { packs: next, currencies: data.currencies }).catch(console.error)
   }
 
   function addPack() {
@@ -55,14 +55,21 @@ export default function ShopEditor() {
                 className={`${inputCls} text-base font-semibold flex-1`} placeholder="Pack name" />
               <button onClick={() => deletePack(pack.id)} className="cursor-pointer text-red-400 hover:text-red-300 text-sm px-3 py-1.5 rounded border border-red-800 transition-colors">Delete</button>
             </div>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-4 gap-4 mb-4">
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Cost (coins)</label>
+                <label className="text-xs text-gray-400 mb-1 block">Cost</label>
                 <input type="number" min={0} value={pack.cost} onChange={(e) => patch(pack.id, { cost: parseInt(e.target.value) || 0 })} className={`${inputCls} w-full`} />
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Draw Count</label>
                 <input type="number" min={1} value={pack.drawCount} onChange={(e) => patch(pack.id, { drawCount: parseInt(e.target.value) || 1 })} className={`${inputCls} w-full`} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Currency</label>
+                <select value={pack.currencyId ?? ''} onChange={(e) => patch(pack.id, { currencyId: e.target.value || undefined })} className={`${inputCls} w-full`}>
+                  <option value="">— default —</option>
+                  {data.currencies.map((c) => <option key={c.id} value={c.id}>{c.id} ({c.icon})</option>)}
+                </select>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Unlock Condition</label>
