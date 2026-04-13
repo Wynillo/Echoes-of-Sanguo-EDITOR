@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { GiOpenBook, GiSpellBook, GiCardPick, GiScrollUnfurled, GiTrashCan, GiGlobe } from 'react-icons/gi'
+import { GiOpenBook, GiSpellBook, GiCardPick, GiScrollUnfurled, GiTrashCan } from 'react-icons/gi'
 import { FaFolderOpen, FaDownload, FaLink } from 'react-icons/fa6'
 import { readProjectFolder } from '@/fs/reader'
 import { useProjectStore } from '@/stores/projectStore'
@@ -118,8 +118,7 @@ export default function StartScreen() {
       })
 
       const data = await importTcgResult(result, null)
-      const projectId = data?.modInfo?.id ?? `import-url-${Date.now()}`
-      load(data ?? {}, null, projectId)
+      load(data ?? {})
       setIsDownloading(false)
       setDownloadProgress(0)
       setUrlInput('')
