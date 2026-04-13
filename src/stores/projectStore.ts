@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 
-const DEFAULT_RULES = {
+export const DEFAULT_RULES = {
   startingLP: 8000, maxFieldZones: 5, deckSize: 40,
   cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8,
 }
@@ -46,11 +46,17 @@ const EMPTY_DATA: ProjectData = {
   images: {},
 }
 
+import { saveProject, loadProject as loadFromDb, deleteProject } from '../db/indexedDb'
+
 interface ProjectStore {
   isLoaded: boolean
   data: ProjectData
   dirHandle: FileSystemDirectoryHandle | null
-  load: (data: Partial<ProjectData>, dir: FileSystemDirectoryHandle | null) => void
+  projectId: string | null
+  load: (data: Partial<ProjectData>, dir: FileSystemDirectoryHandle | null, projectId?: string | null) => void
+  loadFromIndexedDB: (id: string) => Promise<void>
+  saveToIndexedDB: () => Promise<void>
+  deleteFromIndexedDB: (id: string) => Promise<void>
   reset: () => void
   updateCard: (id: number, patch: Partial<EditorCard>) => void
   setCards: (cards: EditorCard[]) => void
@@ -59,18 +65,38 @@ interface ProjectStore {
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
 }
 
-export const useProjectStore = create<ProjectStore>((set) => ({
+export const useProjectStore = create<ProjectStore>((set, get) => ({
   isLoaded: false,
   data: EMPTY_DATA,
   dirHandle: null,
+  projectId: null,
 
-  load: (data, dir) => set({
+  load: (data, dir, projectId = null) => set({
     isLoaded: true,
     dirHandle: dir,
+    projectId,
     data: { ...EMPTY_DATA, ...data },
   }),
 
-  reset: () => set({ isLoaded: false, data: EMPTY_DATA, dirHandle: null }),
+  loadFromIndexedDB: async (id) => {
+    const data = await loadFromDb(id)
+    if (data) {
+      set({ isLoaded: true, data, dirHandle: null, projectId: id })
+    }
+  },
+
+  saveToIndexedDB: async () => {
+    const { data, projectId } = get()
+    if (projectId) {
+      await saveProject(projectId, data.modInfo.name, data)
+    }
+  },
+
+  deleteFromIndexedDB: async (id) => {
+    await deleteProject(id)
+  },
+
+  reset: () => set({ isLoaded: false, data: EMPTY_DATA, dirHandle: null, projectId: null }),
 
   updateCard: (id, patch) => set((s) => ({
     data: {
