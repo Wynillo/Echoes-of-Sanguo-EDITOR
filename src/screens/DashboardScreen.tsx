@@ -124,7 +124,7 @@ export default function DashboardScreen() {
           return (
             <button
               key={key}
-              onClick={() => navigate(`/project/${key}`)}
+              onClick={() => navigate(key === 'rules' || key === 'modinfo' ? `/project/${key}/edit` : `/project/${key}`)}
               className="cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-violet-700/50 rounded-xl p-5 text-left transition-all hover:shadow-md hover:shadow-violet-950/30"
             >
               <Icon size={32} className={`mb-3 ${color}`} />
