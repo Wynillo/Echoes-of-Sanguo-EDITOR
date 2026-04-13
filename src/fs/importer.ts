@@ -1,6 +1,6 @@
 import type { TcgLoadResult } from '@wynillo/tcg-format'
 import type { ProjectData } from '../types/project'
-import { writeJsonFile, writeBinaryFile } from './writer'
+import { writeJsonFile } from './writer'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 import { DEFAULT_ATTRIBUTES, DEFAULT_RACES, DEFAULT_RULES } from '../stores/projectStore'
 
@@ -11,8 +11,8 @@ export async function importTcgResult(
   const cards = result.cards.map(({ id, type, rarity, level, atk, def,
     attribute, race, atkBonus, defBonus, equipReqRace, equipReqAttr,
     spellType, effect }) =>
-    ({ id, type, rarity, level, atk, def, attribute, race,
-      atkBonus, defBonus, equipReqRace, equipReqAttr, spellType, effect }))
+    ({ id, type: type as 1 | 2 | 3 | 4 | 5, rarity: rarity as 1 | 2 | 4 | 6 | 8, level, atk, def, attribute, race,
+      atkBonus, defBonus, equipReqRace, equipReqAttr, spellType: spellType as 1 | 2 | 3 | 4 | undefined, effect }))
 
   const localeData = createEmptyLocaleData()
   const parsedById = new Map(result.parsedCards.map((c) => [c.id, c]))
@@ -39,39 +39,52 @@ export async function importTcgResult(
   const typeMeta = (result as any).typeMeta
 
   if (dir) {
+    const rulesToSave = result.rules ? {
+      startingLP: result.rules.startingLP,
+      maxFieldZones: result.rules.fieldZones,
+      deckSize: result.rules.maxDeckSize,
+      cardCopyLimit: result.rules.maxCardCopies,
+      cardsDrawPerTurn: result.rules.drawPerTurn,
+      handLimit: result.rules.handLimitDraw,
+    } : DEFAULT_RULES
+
     await Promise.all([
       writeJsonFile(dir, 'cards.json', cards),
       writeJsonFile(dir, 'locales/en.json', localeData),
       writeJsonFile(dir, 'opponents.json', opponents),
-      writeJsonFile(dir, 'campaign.json', result.campaignData ?? []),
-      writeJsonFile(dir, 'shop.json', { packs: result.shopData ?? [], currencies: [] }),
+      writeJsonFile(dir, 'campaign.json', result.campaignData ?? { chapters: [] }),
+      writeJsonFile(dir, 'shop.json', result.shopData ?? { packs: [], currencies: [] }),
       writeJsonFile(dir, 'fusion_formulas.json', result.fusionFormulas ?? []),
-      ...(result.rules ? [writeJsonFile(dir, 'rules.json', result.rules)] : []),
+      ...(rulesToSave ? [writeJsonFile(dir, 'rules.json', rulesToSave)] : []),
       ...(typeMeta?.attributes ? [writeJsonFile(dir, 'attributes.json', typeMeta.attributes)] : []),
       ...(typeMeta?.races ? [writeJsonFile(dir, 'races.json', typeMeta.races)] : []),
-      ...Array.from(result.rawImages.entries()).map(([id, buf]) =>
-        writeBinaryFile(dir, `img/${id}.png`, buf)
-      ),
     ])
     return null
   }
 
-  const images: Record<number, Blob> = {}
-  for (const [id, buf] of result.rawImages.entries()) {
-    images[Number(id)] = new Blob([buf], { type: 'image/png' })
-  }
+  const rulesConverted = result.rules ? {
+    startingLP: result.rules.startingLP,
+    maxFieldZones: result.rules.fieldZones,
+    deckSize: result.rules.maxDeckSize,
+    cardCopyLimit: result.rules.maxCardCopies,
+    cardsDrawPerTurn: result.rules.drawPerTurn,
+    handLimit: result.rules.handLimitDraw,
+  } : DEFAULT_RULES
 
   return {
     cards,
     locales: { en: localeData },
     opponents,
-    campaign: result.campaignData ?? [],
-    shop: result.shopData ?? [],
-    fusion: result.fusionFormulas ?? [],
-    rules: result.rules ?? DEFAULT_RULES,
+    campaign: (result.campaignData as any)?.chapters ?? [],
+    shop: (result.shopData as any)?.packs ?? [],
+    fusion: result.fusionFormulas?.map(f => ({
+      ...f,
+      operands: [f.operand1, f.operand2],
+    })) ?? [],
+    rules: rulesConverted,
     attributes: typeMeta?.attributes ?? DEFAULT_ATTRIBUTES,
     races: typeMeta?.races ?? DEFAULT_RACES,
-    images,
+    images: {},
     currencies: [],
     starterDecks: [],
   }

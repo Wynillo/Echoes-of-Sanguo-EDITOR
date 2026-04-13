@@ -5,7 +5,7 @@ import { GiOpenBook, GiSpellBook, GiCardPick, GiScrollUnfurled, GiTrashCan, GiGl
 import { FaFolderOpen, FaDownload, FaLink } from 'react-icons/fa6'
 import { readProjectFolder } from '@/fs/reader'
 import { useProjectStore } from '@/stores/projectStore'
-import { listProjects, deleteProject, getProjectCount, getOldestProject } from '@/db/indexedDb'
+import { listProjects, getProjectCount, getOldestProject } from '@/db/indexedDb'
 import type { ProjectMeta } from '@/db/indexedDb'
 
 const MAX_PROJECTS = 3
@@ -69,7 +69,7 @@ export default function StartScreen() {
     if (!newName.trim()) return
     const projectId = newName.toLowerCase().replace(/\s+/g, '-')
     load({ modInfo: { id: projectId, name: newName.trim(), version: '1.0.0',
-      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } }, null, projectId)
+      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } })
     setShowNewForm(false)
     navigate('/project')
   }
@@ -86,8 +86,7 @@ export default function StartScreen() {
         const { importTcgResult } = await import('@/fs/importer')
         const result = await openTcgFile(file)
         const data = await importTcgResult(result, null)
-        const projectId = data?.modInfo?.id ?? `import-${Date.now()}`
-        load(data ?? {}, null, projectId)
+        load(data ?? {})
         navigate('/project')
       } catch (e) {
         alert(`Import failed: ${(e as Error).message}`)
@@ -154,7 +153,7 @@ export default function StartScreen() {
     try {
       const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
       const data = await readProjectFolder(dir)
-      load(data, dir)
+      load(data)
       navigate('/project')
     } catch (e) {
       if ((e as DOMException).name !== 'AbortError') console.error(e)

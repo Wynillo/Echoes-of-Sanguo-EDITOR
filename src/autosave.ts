@@ -14,7 +14,7 @@ export function startAutoSave(): () => void {
     scheduleSave(async () => {
       if (lastSaveId === projectId) return
       lastSaveId = projectId
-      await saveProject(projectId, data)
+      await saveProject(projectId, data.modInfo.name || projectId, data)
     })
   })
 }

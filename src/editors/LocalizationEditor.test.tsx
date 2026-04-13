@@ -5,7 +5,7 @@ import LocalizationEditor from './LocalizationEditor'
 
 beforeEach(() => useProjectStore.getState().load({
   locales: { en: { common: {}, cards: { '1': { name: 'Red Dragon', description: 'A fierce dragon.' } }, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
-} as any, null))
+} as any))
 
 it('renders card name in table', () => {
   render(<MemoryRouter><LocalizationEditor /></MemoryRouter>)

@@ -1,10 +1,15 @@
 import { create } from 'zustand'
 import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
+import { loadProject, deleteProject } from '../db/indexedDb'
 
 export const DEFAULT_RULES = {
-  startingLP: 8000, maxFieldZones: 5, deckSize: 40,
-  cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8,
+  startingLP: 8000,
+  maxFieldZones: 5,
+  deckSize: 40,
+  cardCopyLimit: 3,
+  cardsDrawPerTurn: 1,
+  handLimit: 8,
 }
 
 export const DEFAULT_ATTRIBUTES: EditorAttribute[] = [
@@ -55,6 +60,14 @@ interface ProjectStore {
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
+  setOpponents: (opponents: any[]) => void
+  setCampaign: (campaign: any[]) => void
+  setShop: (shop: any[]) => void
+  setFusion: (fusion: any[]) => void
+  setStarterDecks: (decks: any[]) => void
+  setCurrencies: (currencies: any[]) => void
+  loadFromIndexedDB: (id: string) => Promise<void>
+  deleteFromIndexedDB: (id: string) => Promise<void>
 }
 
 export const useProjectStore = create<ProjectStore>((set) => ({
@@ -95,4 +108,22 @@ export const useProjectStore = create<ProjectStore>((set) => ({
       },
     }
   }),
+
+  setOpponents: (opponents) => set((s) => ({ data: { ...s.data, opponents } })),
+  setCampaign: (campaign) => set((s) => ({ data: { ...s.data, campaign } })),
+  setShop: (shop) => set((s) => ({ data: { ...s.data, shop } })),
+  setFusion: (fusion) => set((s) => ({ data: { ...s.data, fusion } })),
+  setStarterDecks: (starterDecks) => set((s) => ({ data: { ...s.data, starterDecks } })),
+  setCurrencies: (currencies) => set((s) => ({ data: { ...s.data, currencies } })),
+
+  loadFromIndexedDB: async (id) => {
+    const data = await loadProject(id)
+    if (data) {
+      set({ isLoaded: true, data: { ...EMPTY_DATA, ...data } })
+    }
+  },
+
+  deleteFromIndexedDB: async (id) => {
+    await deleteProject(id)
+  },
 }))

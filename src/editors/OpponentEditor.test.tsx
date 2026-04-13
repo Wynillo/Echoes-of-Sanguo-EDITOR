@@ -7,7 +7,7 @@ beforeEach(() => useProjectStore.getState().load({
   opponents: [{ id: 1, coinsWin: 200, coinsLoss: 0, deckIds: [], behavior: 'default' }],
   cards: [],
   locales: { en: { common: {}, cards: {}, opponents: { '1': { name: 'Liu Bei', title: 'Lord', flavor: '' } }, shop: {}, campaign: {}, races: {}, attributes: {} } },
-} as any, null))
+} as any))
 
 it('renders opponent name', () => {
   render(
