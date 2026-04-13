@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { GiOpenBook, GiSpellBook, GiCardPick, GiScrollUnfurled, GiTrashCan } from 'react-icons/gi'
-import { FaFolderOpen } from 'react-icons/fa6'
+import { GiOpenBook, GiSpellBook, GiCardPick, GiScrollUnfurled, GiTrashCan, GiGlobe } from 'react-icons/gi'
+import { FaFolderOpen, FaDownload, FaLink } from 'react-icons/fa6'
 import { readProjectFolder } from '@/fs/reader'
 import { useProjectStore } from '@/stores/projectStore'
 import { listProjects, deleteProject, getProjectCount, getOldestProject } from '@/db/indexedDb'
@@ -23,7 +23,13 @@ export default function StartScreen() {
   const [savedProjects, setSavedProjects] = useState<ProjectMeta[]>([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [showLimitConfirm, setShowLimitConfirm] = useState(false)
-  const [pendingAction, setPendingAction] = useState<'create' | 'import' | null>(null)
+  const [pendingAction, setPendingAction] = useState<'create' | 'import' | 'import-url' | null>(null)
+  const [showUrlForm, setShowUrlForm] = useState(false)
+  const [urlInput, setUrlInput] = useState('')
+  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [urlError, setUrlError] = useState<string | null>(null)
+  const [downloadingFileName, setDownloadingFileName] = useState<string | null>(null)
 
   useEffect(() => {
     loadSavedProjects()
@@ -34,14 +40,15 @@ export default function StartScreen() {
     setSavedProjects(projects)
   }
 
-  async function checkLimitAndProceed(action: 'create' | 'import') {
+  async function checkLimitAndProceed(action: 'create' | 'import' | 'import-url') {
     const count = await getProjectCount()
     if (count >= MAX_PROJECTS) {
       setPendingAction(action)
       setShowLimitConfirm(true)
     } else {
       if (action === 'create') doCreate()
-      else doImport()
+      else if (action === 'import') doImport()
+      else if (action === 'import-url') doImportFromUrl()
     }
   }
 
@@ -53,6 +60,7 @@ export default function StartScreen() {
     setShowLimitConfirm(false)
     if (pendingAction === 'create') doCreate()
     else if (pendingAction === 'import') doImport()
+    else if (pendingAction === 'import-url') doImportFromUrl()
     setPendingAction(null)
     loadSavedProjects()
   }
@@ -88,6 +96,49 @@ export default function StartScreen() {
     input.click()
   }
 
+  async function doImportFromUrl() {
+    const { validateReleaseUrl, loadTcgFromUrl } = await import('@/fs/tcg')
+    const { importTcgResult } = await import('@/fs/importer')
+
+    setUrlError(null)
+    const validation = validateReleaseUrl(urlInput.trim())
+    if (!validation.valid) {
+      setUrlError(validation.error ?? 'Invalid URL')
+      return
+    }
+
+    setIsDownloading(true)
+    setDownloadProgress(0)
+
+    try {
+      const fileName = urlInput.trim().split('/').pop() ?? 'mod.tcg'
+      setDownloadingFileName(fileName)
+
+      const result = await loadTcgFromUrl(urlInput.trim(), (progress) => {
+        setDownloadProgress(progress.percent)
+      })
+
+      const data = await importTcgResult(result, null)
+      const projectId = data?.modInfo?.id ?? `import-url-${Date.now()}`
+      load(data ?? {}, null, projectId)
+      setIsDownloading(false)
+      setDownloadProgress(0)
+      setUrlInput('')
+      setShowUrlForm(false)
+      navigate('/project')
+    } catch (e) {
+      setIsDownloading(false)
+      setDownloadProgress(0)
+      let errorMsg = (e as Error).message
+      if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
+        errorMsg = 'Failed to download. Check your internet connection and try again.'
+      } else if (errorMsg.includes('CORS')) {
+        errorMsg = 'This URL does not allow browser access. Use a GitHub or GitLab release link.'
+      }
+      setUrlError(errorMsg)
+    }
+  }
+
   async function handleLoadProject(id: string) {
     await loadFromIndexedDB(id)
     navigate('/project')
@@ -111,6 +162,12 @@ export default function StartScreen() {
   }
 
   const inputCls = 'w-full bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50'
+
+  const handleUrlImportClick = () => {
+    setShowUrlForm(true)
+    setUrlInput('')
+    setUrlError(null)
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 p-8">
@@ -143,6 +200,13 @@ export default function StartScreen() {
         >
           <GiCardPick size={32} className="text-slate-300" />
           <span className="text-sm font-medium">{t('start.import')}</span>
+        </button>
+        <button
+          onClick={handleUrlImportClick}
+          className="cursor-pointer w-52 bg-slate-800/80 hover:bg-slate-700/80 border border-white/8 rounded-xl px-6 py-5 flex flex-col items-center gap-3 transition-all hover:border-white/16 hover:shadow-lg hover:shadow-violet-950/40"
+        >
+          <FaLink size={32} className="text-emerald-400" />
+          <span className="text-sm font-medium">Import from URL</span>
         </button>
       </div>
 
@@ -260,6 +324,90 @@ export default function StartScreen() {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* URL import dialog */}
+      {showUrlForm && !isDownloading && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-white/10 rounded-xl p-6 w-[32rem] flex flex-col gap-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <FaLink className="text-emerald-400" />
+              Import Mod from URL
+            </h2>
+            <p className="text-sm text-slate-400">
+              Paste a GitHub release, GitHub raw, or GitLab release URL pointing to a .tcg file.
+            </p>
+            <input
+              placeholder="https://github.com/user/repo/releases/latest/download/mod.tcg"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && urlInput.trim()) {
+                  checkLimitAndProceed('import-url')
+                } else if (e.key === 'Escape') {
+                  setShowUrlForm(false)
+                  setUrlError(null)
+                }
+              }}
+              className={inputCls}
+              autoFocus
+              disabled={isDownloading}
+            />
+            {urlError && (
+              <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-sm text-red-300">
+                {urlError}
+              </div>
+            )}
+            <div className="bg-slate-900/50 rounded-lg p-3 text-xs text-slate-400">
+              <p className="font-semibold mb-1">Supported formats:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>GitHub Releases: <code className="text-slate-300">github.com/.../releases/latest/download/*.tcg</code></li>
+                <li>GitHub Raw: <code className="text-slate-300">raw.githubusercontent.com/.../*.tcg</code></li>
+                <li>GitLab Releases: <code className="text-slate-300">gitlab.com/.../releases/.../downloads/*.tcg</code></li>
+              </ul>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => { setShowUrlForm(false); setUrlError(null) }}
+                className="cursor-pointer text-sm text-slate-400 hover:text-white px-4 py-2 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => checkLimitAndProceed('import-url')}
+                disabled={!urlInput.trim()}
+                className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+              >
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download progress dialog */}
+      {isDownloading && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-white/10 rounded-xl p-6 w-96 flex flex-col gap-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <FaDownload className="text-emerald-400 animate-pulse" />
+              Downloading Mod...
+            </h2>
+            {downloadingFileName && (
+              <p className="text-sm text-slate-400 truncate">{downloadingFileName}</p>
+            )}
+            <div className="w-full bg-slate-900 rounded-full h-4 overflow-hidden border border-white/10">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-600 to-cyan-500 transition-all duration-300 ease-out"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+            <p className="text-right text-sm text-slate-400">{downloadProgress}%</p>
+            <p className="text-xs text-slate-500 pt-2">
+              {downloadProgress < 100 ? 'Please wait while the mod is being downloaded...' : 'Download complete!'}
+            </p>
           </div>
         </div>
       )}

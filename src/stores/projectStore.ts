@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 
-const DEFAULT_RULES = {
+export const DEFAULT_RULES = {
   startingLP: 8000, maxFieldZones: 5, deckSize: 40,
   cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8,
 }
