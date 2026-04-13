@@ -32,7 +32,7 @@ export default function SectionListScreen() {
   const [typeFilter, setTypeFilter] = useState(0) // 0 = All
 
   function getItems(): unknown[] {
-    if (section === 'modinfo') return []
+    if (section === 'modinfo' || section === 'rules') return []
     if (section === 'localization') return data.cards // Show cards in localization view
     if (section === 'starterdecks') return data.starterDecks
     if (section === 'currencies') return data.currencies
