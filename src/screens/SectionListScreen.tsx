@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FaArrowLeft } from 'react-icons/fa6'
+import { FaArrowLeft, FaFileImport } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
   GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiCardJoker, GiTwoCoins,
@@ -28,8 +28,49 @@ export default function SectionListScreen() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const data = useProjectStore((s) => s.data)
+  const setCards = useProjectStore((s) => s.setCards)
+  const setOpponents = useProjectStore((s) => s.setOpponents)
+  const setCampaign = useProjectStore((s) => s.setCampaign)
+  const setShop = useProjectStore((s) => s.setShop)
+  const setFusion = useProjectStore((s) => s.setFusion)
+  const setStarterDecks = useProjectStore((s) => s.setStarterDecks)
+  const setCurrencies = useProjectStore((s) => s.setCurrencies)
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState(0) // 0 = All
+
+  const IMPORT_FILE_MAP: Record<string, string> = {
+    cards: 'cards.json',
+    opponents: 'opponents.json',
+    campaign: 'campaign.json',
+    shop: 'shop.json',
+    fusion: 'fusion_formulas.json',
+    starterdecks: 'starterDecks.json',
+    currencies: 'currencies.json',
+  }
+
+  async function handleImport() {
+    try {
+      const [fileHandle] = await (window as any).showOpenFilePicker({
+        types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+      })
+      const file = await fileHandle.getFile()
+      const data = JSON.parse(await file.text())
+
+      const key = IMPORT_FILE_MAP[section ?? '']
+      if (key === 'cards.json') setCards(data as any)
+      else if (key === 'opponents.json') setOpponents(data as any)
+      else if (key === 'campaign.json') setCampaign(data as any)
+      else if (key === 'shop.json') setShop((data as any).packs ?? [])
+      else if (key === 'fusion_formulas.json') setFusion(data as any)
+      else if (key === 'starterDecks.json') setStarterDecks(data as any)
+      else if (key === 'currencies.json') setCurrencies(data as any)
+    } catch (e) {
+      if ((e as DOMException).name !== 'AbortError') {
+        console.error('Import failed:', e)
+        alert('Failed to import: ' + (e as Error).message)
+      }
+    }
+  }
 
   function getItems(): unknown[] {
     if (section === 'modinfo' || section === 'rules') return []
@@ -77,6 +118,15 @@ export default function SectionListScreen() {
           <FaArrowLeft size={12} /> {t(`section.${section}`)}
         </button>
         <div className="ml-auto flex gap-2">
+          {IMPORT_FILE_MAP[section ?? ''] && (
+            <button
+              onClick={handleImport}
+              className="cursor-pointer flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 px-3 py-1.5 rounded-lg text-sm transition-colors"
+              title="Import from JSON file"
+            >
+              <FaFileImport size={12} /> {t('list.import') || 'Import'}
+            </button>
+          )}
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}

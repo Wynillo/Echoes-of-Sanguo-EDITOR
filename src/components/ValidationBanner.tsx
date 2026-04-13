@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { validateTcgCards } from '@wynillo/tcg-format'
+import { validateTcgCards } from '@wynillo/tcg-format/validators'
 import { useProjectStore } from '../stores/projectStore'
 import { validateProject } from '../validation/validateProject'
 import type { ValidationIssue } from '../validation/validateProject'
@@ -8,9 +8,7 @@ import { FaXmark, FaChevronUp, FaChevronDown, FaTriangleExclamation } from 'reac
 export function useValidation() {
   const { data } = useProjectStore()
   return useMemo(() => {
-    // Card-level validation from tcg-format
     const cardResult = validateTcgCards(data.cards)
-    // Cross-reference validation
     const projectResult = validateProject(data)
 
     const errors = [

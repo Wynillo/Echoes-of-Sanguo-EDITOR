@@ -20,6 +20,7 @@
   "section.currencies": "Currencies",
   "list.new": "New",
   "list.search": "Search...",
+  "list.import": "Import",
   "editor.save": "Save",
   "editor.delete": "Delete",
   "editor.confirm_delete": "Are you sure you want to delete this item?",
