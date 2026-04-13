@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FaArrowLeft, FaSpinner, FaFolderOpen, FaCheck, FaTriangleExclamation } from 'react-icons/fa6'
+import { FaArrowLeft, FaSpinner, FaCheck, FaTriangleExclamation } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
   GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiTwoCoins, GiCardJoker,
@@ -33,18 +33,9 @@ function sectionCount(data: Record<string, unknown>, key: string): number | null
 export default function DashboardScreen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { data, dirHandle, setDirHandle } = useProjectStore()
+  const { data } = useProjectStore()
   const { hasErrors, errors, warnings } = useValidation()
   const [exporting, setExporting] = useState(false)
-
-  async function handleConnectFolder() {
-    try {
-      const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
-      setDirHandle(dir)
-    } catch (e) {
-      if ((e as DOMException).name !== 'AbortError') console.error(e)
-    }
-  }
 
   const completeness = errors.length === 0 && warnings.length === 0
     ? 'complete'
@@ -102,18 +93,6 @@ export default function DashboardScreen() {
           </button>
         </div>
       </div>
-
-      {!dirHandle && (
-        <div className="flex items-center gap-3 text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2 mb-4">
-          <span className="flex-1">No folder linked — auto-save disabled.</span>
-          <button
-            onClick={handleConnectFolder}
-            className="cursor-pointer flex items-center gap-1.5 hover:text-amber-300 transition-colors font-medium"
-          >
-            <FaFolderOpen size={12} /> Connect folder
-          </button>
-        </div>
-      )}
 
       <ValidationBanner />
 

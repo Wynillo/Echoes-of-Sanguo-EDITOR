@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 
-export const DEFAULT_RULES = {
+const DEFAULT_RULES = {
   startingLP: 8000, maxFieldZones: 5, deckSize: 40,
   cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8,
 }
@@ -46,63 +46,27 @@ const EMPTY_DATA: ProjectData = {
   images: {},
 }
 
-import { saveProject, loadProject as loadFromDb, deleteProject } from '../db/indexedDb'
-
 interface ProjectStore {
   isLoaded: boolean
   data: ProjectData
-  dirHandle: FileSystemDirectoryHandle | null
-  projectId: string | null
-  load: (data: Partial<ProjectData>, dir: FileSystemDirectoryHandle | null, projectId?: string | null) => void
-  loadFromIndexedDB: (id: string) => Promise<void>
-  saveToIndexedDB: () => Promise<void>
-  deleteFromIndexedDB: (id: string) => Promise<void>
+  load: (data: Partial<ProjectData>) => void
   reset: () => void
   updateCard: (id: number, patch: Partial<EditorCard>) => void
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
-  setOpponents: (opponents: ProjectData['opponents']) => void
-  setCampaign: (campaign: ProjectData['campaign']) => void
-  setShop: (shop: ProjectData['shop']) => void
-  setFusion: (fusion: ProjectData['fusion']) => void
-  setStarterDecks: (starterDecks: ProjectData['starterDecks']) => void
-  setCurrencies: (currencies: ProjectData['currencies']) => void
-  setDirHandle: (dir: FileSystemDirectoryHandle) => void
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
 }
 
-export const useProjectStore = create<ProjectStore>((set, get) => ({
+export const useProjectStore = create<ProjectStore>((set) => ({
   isLoaded: false,
   data: EMPTY_DATA,
-  dirHandle: null,
-  projectId: null,
 
-  load: (data, dir, projectId = null) => set({
+  load: (data) => set({
     isLoaded: true,
-    dirHandle: dir,
-    projectId,
     data: { ...EMPTY_DATA, ...data },
   }),
 
-  loadFromIndexedDB: async (id) => {
-    const data = await loadFromDb(id)
-    if (data) {
-      set({ isLoaded: true, data, dirHandle: null, projectId: id })
-    }
-  },
-
-  saveToIndexedDB: async () => {
-    const { data, projectId } = get()
-    if (projectId) {
-      await saveProject(projectId, data.modInfo.name, data)
-    }
-  },
-
-  deleteFromIndexedDB: async (id) => {
-    await deleteProject(id)
-  },
-
-  reset: () => set({ isLoaded: false, data: EMPTY_DATA, dirHandle: null, projectId: null }),
+  reset: () => set({ isLoaded: false, data: EMPTY_DATA }),
 
   updateCard: (id, patch) => set((s) => ({
     data: {
@@ -113,21 +77,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   setCards: (cards) => set((s) => ({ data: { ...s.data, cards } })),
 
-  setOpponents: (opponents) => set((s) => ({ data: { ...s.data, opponents } })),
-
-  setCampaign: (campaign) => set((s) => ({ data: { ...s.data, campaign } })),
-
-  setShop: (shop) => set((s) => ({ data: { ...s.data, shop } })),
-
-  setFusion: (fusion) => set((s) => ({ data: { ...s.data, fusion } })),
-
-  setStarterDecks: (starterDecks) => set((s) => ({ data: { ...s.data, starterDecks } })),
-
-  setCurrencies: (currencies) => set((s) => ({ data: { ...s.data, currencies } })),
-
   setData: (key, value) => set((s) => ({ data: { ...s.data, [key]: value } })),
-
-  setDirHandle: (dir) => set({ dirHandle: dir }),
 
   setLocaleField: (lang, domain, key, value) => set((s) => {
     const langData = s.data.locales[lang] ?? createEmptyLocaleData()

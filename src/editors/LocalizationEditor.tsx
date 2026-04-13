@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaPlus, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import { createEmptyLocaleData, getLanguages } from '../utils/localeHelpers'
 import type { LocaleData } from '../types/project'
 
@@ -18,7 +17,7 @@ const DOMAIN_TABS: { key: Domain; label: string }[] = [
 
 export default function LocalizationEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const [search, setSearch] = useState('')
   const [activeLang, setActiveLang] = useState('en')
   const [activeDomain, setActiveDomain] = useState<Domain>('cards')
@@ -31,7 +30,6 @@ export default function LocalizationEditor() {
   function saveLangData(updated: LocaleData) {
     const nextLocales = { ...data.locales, [activeLang]: updated }
     setData('locales', nextLocales)
-    if (dirHandle) writeJsonFile(dirHandle, `locales/${activeLang}.json`, updated).catch(console.error)
   }
 
   function addLanguage() {
@@ -39,7 +37,6 @@ export default function LocalizationEditor() {
     if (!code || data.locales[code]) return
     const nextLocales = { ...data.locales, [code]: createEmptyLocaleData() }
     setData('locales', nextLocales)
-    if (dirHandle) writeJsonFile(dirHandle, `locales/${code}.json`, nextLocales[code]).catch(console.error)
     setActiveLang(code)
     setNewLang('')
     setAddLangOpen(false)

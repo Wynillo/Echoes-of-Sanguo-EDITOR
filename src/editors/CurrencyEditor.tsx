@@ -1,17 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorCurrency } from '../types/project'
 
 export default function CurrencyEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const currencies = data.currencies
 
   function save(next: EditorCurrency[]) {
     setData('currencies', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'shop.json', { packs: data.shop, currencies: next }).catch(console.error)
   }
 
   function addCurrency() {

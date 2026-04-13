@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorRules } from '../types/project'
 
 const RULE_FIELDS: Array<{ key: keyof EditorRules; label: string; min: number }> = [
@@ -15,13 +14,12 @@ const RULE_FIELDS: Array<{ key: keyof EditorRules; label: string; min: number }>
 
 export default function RulesEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const rules = data.rules
 
   function patch(update: Partial<EditorRules>) {
     const next = { ...rules, ...update }
     setData('rules', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'rules.json', next).catch(console.error)
   }
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white w-full'

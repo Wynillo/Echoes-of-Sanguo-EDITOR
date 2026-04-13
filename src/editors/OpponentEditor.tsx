@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorOpponent } from '../types/project'
 import { getOpponentField } from '../utils/localeHelpers'
@@ -11,7 +10,7 @@ const BEHAVIORS = ['default', 'smart', 'aggressive', 'defensive', 'cheating'] as
 export default function OpponentEditor() {
   const { id } = useParams<{ section: string; id: string }>()
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
 
   const oppId = parseInt(id ?? '0', 10)
   const opp = data.opponents.find((o) => o.id === oppId) ?? {
@@ -25,7 +24,6 @@ export default function OpponentEditor() {
   function patch(update: Partial<EditorOpponent>) {
     const next = data.opponents.map((o) => o.id === oppId ? { ...o, ...update } : o)
     setData('opponents', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'opponents.json', next).catch(console.error)
   }
 
   function patchLocale(field: 'name' | 'title' | 'flavor', value: string) {
@@ -39,7 +37,6 @@ export default function OpponentEditor() {
       },
     }
     setData('locales', nextLocales)
-    if (dirHandle) writeJsonFile(dirHandle, 'locales/en.json', nextLocales.en).catch(console.error)
   }
 
   function handleDelete() {

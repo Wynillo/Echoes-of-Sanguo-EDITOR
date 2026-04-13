@@ -2,24 +2,17 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorStarterDeck } from '../types/project'
 
 export default function StarterDecksEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const decks = data.starterDecks
   const [selectedIdx, setSelectedIdx] = useState<number>(0)
 
   function save(next: EditorStarterDeck[]) {
     setData('starterDecks', next)
-    if (dirHandle) {
-      // Save in MOD-base format
-      const obj: Record<string, number[]> = {}
-      for (const d of next) obj[String(d.raceId)] = d.cardIds
-      writeJsonFile(dirHandle, 'starterDecks.json', obj).catch(console.error)
-    }
   }
 
   function addDeck() {

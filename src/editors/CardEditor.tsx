@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import CardPreview from '../components/CardPreview'
 import ImagePicker from '../components/ImagePicker'
 import EffectPicker from '../components/EffectPicker'
@@ -20,7 +19,7 @@ export default function CardEditor() {
   const { id } = useParams<{ section: string; id: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { data, dirHandle, updateCard, setData } = useProjectStore()
+  const { data, updateCard, setData } = useProjectStore()
 
   const { attributes, races } = data
   const [quickAddField, setQuickAddField] = useState<string | null>(null)
@@ -28,14 +27,12 @@ export default function CardEditor() {
   function addAttributeToStore(attr: EditorAttribute): number {
     const next = [...attributes, attr]
     setData('attributes', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'attributes.json', next).catch(console.error)
     return attr.id
   }
 
   function addRaceToStore(race: EditorRace): number {
     const next = [...races, race]
     setData('races', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'races.json', next).catch(console.error)
     return race.id
   }
 
@@ -53,7 +50,6 @@ export default function CardEditor() {
 
   function patchCard(patch: Partial<EditorCard>) {
     updateCard(cardId, patch)
-    if (dirHandle) writeJsonFile(dirHandle, 'cards.json', data.cards.map(c => c.id === cardId ? { ...c, ...patch } : c)).catch(console.error)
   }
 
   function patchLocale(patch: { name?: string; description?: string }) {
@@ -67,7 +63,6 @@ export default function CardEditor() {
       },
     }
     setData('locales', nextLocales)
-    if (dirHandle) writeJsonFile(dirHandle, 'locales/en.json', nextLocales.en).catch(console.error)
   }
 
   function patchImage(blob: Blob) {

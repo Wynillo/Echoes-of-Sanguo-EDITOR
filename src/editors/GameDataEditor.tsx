@@ -1,7 +1,6 @@
 import { useState, Suspense, lazy } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorAttribute, EditorRace } from '../types/project'
 import QuickAddAttribute from '../components/QuickAddAttribute'
 import QuickAddRace from '../components/QuickAddRace'
@@ -10,7 +9,7 @@ const GiIconPicker = lazy(() => import('../components/GiIconPicker'))
 
 export default function GameDataEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const { attributes, races } = data
 
   const [addingAttribute, setAddingAttribute] = useState(false)
@@ -21,12 +20,10 @@ export default function GameDataEditor() {
 
   function saveAttributes(next: EditorAttribute[]) {
     setData('attributes', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'attributes.json', next).catch(console.error)
   }
 
   function saveRaces(next: EditorRace[]) {
     setData('races', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'races.json', next).catch(console.error)
   }
 
   function patchAttribute(id: number, patch: Partial<EditorAttribute>) {

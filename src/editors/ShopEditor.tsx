@@ -1,18 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorShopPack } from '../types/project'
 
 export default function ShopEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const packs = data.shop
 
   function save(next: EditorShopPack[]) {
     setData('shop', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'shop.json', { packs: next, currencies: data.currencies }).catch(console.error)
   }
 
   function addPack() {

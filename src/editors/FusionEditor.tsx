@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorFusionFormula, EditorRace } from '../types/project'
 import QuickAddRace from '../components/QuickAddRace'
 
 export default function FusionEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const formulas = data.fusion
   const races = data.races
   const [quickAddOpen, setQuickAddOpen] = useState<string | null>(null)
@@ -16,7 +15,6 @@ export default function FusionEditor() {
   function addRaceToStore(race: EditorRace, formulaId: string, operandIndex: 0 | 1) {
     const nextRaces = [...races, race]
     setData('races', nextRaces)
-    if (dirHandle) writeJsonFile(dirHandle, 'races.json', nextRaces).catch(console.error)
     const formula = formulas.find((f) => f.id === formulaId)!
     const newOperands: [number, number] = [formula.operands[0], formula.operands[1]]
     newOperands[operandIndex] = race.id
@@ -26,7 +24,6 @@ export default function FusionEditor() {
 
   function save(next: EditorFusionFormula[]) {
     setData('fusion', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'fusion_formulas.json', next).catch(console.error)
   }
 
   function addFormula() {

@@ -1,24 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorModInfo } from '../types/project'
 
 const MOD_TYPES = ['base', 'expansion', 'cosmetic']
 
 export default function ModInfoEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const modInfo = data.modInfo
 
   function patch(update: Partial<EditorModInfo>) {
     const next = { ...modInfo, ...update }
     setData('modInfo', next)
-    if (dirHandle) {
-      const { formatVersion, name, author, ...mod } = next
-      writeJsonFile(dirHandle, 'mod.json', mod).catch(console.error)
-      writeJsonFile(dirHandle, 'manifest.json', { formatVersion, name, author }).catch(console.error)
-    }
   }
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white w-full'
@@ -60,7 +54,7 @@ export default function ModInfoEditor() {
               onChange={(e) => patch({ formatVersion: parseInt(e.target.value) || 1 })} className={inputCls} />
           ))}
         </div>
-        <p className="text-xs text-gray-500 mt-3">Changes are saved to mod.json and manifest.json in your project folder.</p>
+        <p className="text-xs text-gray-500 mt-3">Changes are saved automatically via IndexedDB.</p>
       </div>
     </div>
   )
