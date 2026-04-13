@@ -7,7 +7,7 @@ beforeEach(() => useProjectStore.getState().load({
   campaign: [{ id: 'ch1', title: 'Chapter One', nodes: [
     { id: 'n1', type: 'duel', opponentId: 1, rewards: [] }
   ]}],
-} as any, null))
+} as any))
 
 it('renders chapter title', () => {
   render(<MemoryRouter><CampaignEditor /></MemoryRouter>)

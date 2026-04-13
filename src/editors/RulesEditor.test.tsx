@@ -5,7 +5,7 @@ import RulesEditor from './RulesEditor'
 
 beforeEach(() => useProjectStore.getState().load({
   rules: { startingLP: 8000, maxFieldZones: 5, deckSize: 40, cardCopyLimit: 3, cardsDrawPerTurn: 1, handLimit: 8 },
-} as any, null))
+} as any))
 
 it('renders starting LP field', () => {
   render(<MemoryRouter><RulesEditor /></MemoryRouter>)

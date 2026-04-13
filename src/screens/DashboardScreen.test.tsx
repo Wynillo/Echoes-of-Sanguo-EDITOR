@@ -11,7 +11,6 @@ beforeEach(() => {
         type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 },
       cards: [{} as any, {} as any, {} as any],
     },
-    null
   )
 })
 
