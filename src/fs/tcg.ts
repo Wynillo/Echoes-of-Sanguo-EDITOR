@@ -106,3 +106,85 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+export interface DownloadProgress {
+  loaded: number
+  total: number | null
+  percent: number
+}
+
+export async function loadTcgFromUrl(
+  url: string,
+  onProgress?: (progress: DownloadProgress) => void
+): Promise<TcgLoadResult> {
+  const response = await fetch(url, { method: 'GET' })
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Mod file not found. Verify the URL is correct.')
+    }
+    throw new Error(`Failed to download: ${response.statusText}`)
+  }
+
+  const contentLength = response.headers.get('Content-Length')
+  const total = contentLength ? parseInt(contentLength, 10) : null
+
+  const reader = response.body?.getReader()
+  if (!reader) {
+    throw new Error('ReadableStream not supported')
+  }
+
+  const chunks: Uint8Array[] = []
+  let loaded = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    chunks.push(value)
+    loaded += value.length
+
+    if (onProgress) {
+      onProgress({
+        loaded,
+        total,
+        percent: total ? Math.round((loaded / total) * 100) : 0,
+      })
+    }
+  }
+
+  const buffer = new Uint8Array(loaded)
+  let offset = 0
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset)
+    offset += chunk.length
+  }
+
+  return loadTcgFile(buffer.buffer)
+}
+
+const GITHUB_RELEASE_REGEX = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/(latest|download)\/[^/]+\.tcg$/i
+const GITHUB_RAW_REGEX = /^https:\/\/(raw\.githubusercontent\.com|github\.com)\/[^/]+\/[^/]+\/[^/]+\/[^/]+\/.*\.tcg$/i
+const GITLAB_RELEASE_REGEX = /^https:\/\/gitlab\.com\/[^/]+\/[^/]+\/-\/releases\/[^/]+\/downloads\/.*\.tcg$/i
+
+export function validateReleaseUrl(url: string): { valid: boolean; type?: 'github' | 'gitlab'; error?: string } {
+  if (!url.startsWith('https://')) {
+    return { valid: false, error: 'URL must use HTTPS' }
+  }
+
+  if (GITHUB_RELEASE_REGEX.test(url)) {
+    return { valid: true, type: 'github' }
+  }
+
+  if (GITHUB_RAW_REGEX.test(url)) {
+    return { valid: true, type: 'github' }
+  }
+
+  if (GITLAB_RELEASE_REGEX.test(url)) {
+    return { valid: true, type: 'gitlab' }
+  }
+
+  return {
+    valid: false,
+    error: 'URL must be a GitHub release, GitHub raw, or GitLab release URL ending with .tcg',
+  }
+}

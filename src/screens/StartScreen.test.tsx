@@ -3,9 +3,10 @@ import { MemoryRouter } from 'react-router-dom'
 import StartScreen from './StartScreen'
 import '../i18n'
 
-it('renders three action buttons', () => {
+it('renders four action buttons', () => {
   render(<MemoryRouter><StartScreen /></MemoryRouter>)
   expect(screen.getByText(/Open Project Folder/i)).toBeInTheDocument()
   expect(screen.getByText(/New Project/i)).toBeInTheDocument()
   expect(screen.getByText(/Import .tcg/i)).toBeInTheDocument()
+  expect(screen.getByText(/Import from URL/i)).toBeInTheDocument()
 })
