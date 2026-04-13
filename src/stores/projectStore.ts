@@ -49,28 +49,24 @@ const EMPTY_DATA: ProjectData = {
 interface ProjectStore {
   isLoaded: boolean
   data: ProjectData
-  dirHandle: FileSystemDirectoryHandle | null
-  load: (data: Partial<ProjectData>, dir: FileSystemDirectoryHandle | null) => void
+  load: (data: Partial<ProjectData>) => void
   reset: () => void
   updateCard: (id: number, patch: Partial<EditorCard>) => void
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
-  setDirHandle: (dir: FileSystemDirectoryHandle) => void
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
 }
 
 export const useProjectStore = create<ProjectStore>((set) => ({
   isLoaded: false,
   data: EMPTY_DATA,
-  dirHandle: null,
 
-  load: (data, dir) => set({
+  load: (data) => set({
     isLoaded: true,
-    dirHandle: dir,
     data: { ...EMPTY_DATA, ...data },
   }),
 
-  reset: () => set({ isLoaded: false, data: EMPTY_DATA, dirHandle: null }),
+  reset: () => set({ isLoaded: false, data: EMPTY_DATA }),
 
   updateCard: (id, patch) => set((s) => ({
     data: {
@@ -82,8 +78,6 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   setCards: (cards) => set((s) => ({ data: { ...s.data, cards } })),
 
   setData: (key, value) => set((s) => ({ data: { ...s.data, [key]: value } })),
-
-  setDirHandle: (dir) => set({ dirHandle: dir }),
 
   setLocaleField: (lang, domain, key, value) => set((s) => {
     const langData = s.data.locales[lang] ?? createEmptyLocaleData()

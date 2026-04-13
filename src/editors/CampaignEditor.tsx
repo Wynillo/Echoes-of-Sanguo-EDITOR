@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaArrowLeft, FaXmark, FaChevronUp, FaChevronDown } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
-import { writeJsonFile } from '../fs/writer'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
 
 const NODE_TYPES = ['duel', 'duel_elite', 'boss', 'story', 'reward', 'shop', 'branch', 'rest', 'treasure', 'gauntlet'] as const
@@ -16,7 +15,7 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 
 export default function CampaignEditor() {
   const navigate = useNavigate()
-  const { data, dirHandle, setData } = useProjectStore()
+  const { data, setData } = useProjectStore()
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(
     data.campaign[0]?.id ?? null
   )
@@ -29,7 +28,6 @@ export default function CampaignEditor() {
 
   function save(next: EditorCampaignChapter[]) {
     setData('campaign', next)
-    if (dirHandle) writeJsonFile(dirHandle, 'campaign.json', next).catch(console.error)
   }
 
   function addChapter() {

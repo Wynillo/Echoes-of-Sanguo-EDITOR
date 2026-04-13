@@ -20,7 +20,7 @@ export default function StartScreen() {
     try {
       const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
       const data = await readProjectFolder(dir)
-      load(data, dir)
+      load(data)
       navigate('/project')
     } catch (e) {
       if ((e as DOMException).name !== 'AbortError') console.error(e)
@@ -29,15 +29,8 @@ export default function StartScreen() {
 
   async function handleCreate() {
     if (!newName.trim()) return
-    let dir: FileSystemDirectoryHandle | null = null
-    try {
-      dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
-    } catch (e) {
-      if ((e as DOMException).name !== 'AbortError') { console.error(e); return }
-      // AbortError = User closed the picker → continue without a folder
-    }
     load({ modInfo: { id: newName.toLowerCase().replace(/\s+/g, '-'), name: newName.trim(), version: '1.0.0',
-      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } }, dir)
+      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } })
     navigate('/project')
   }
 
@@ -55,7 +48,7 @@ export default function StartScreen() {
         const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
         await importTcgResult(result, dir)
         const data = await readProjectFolder(dir)
-        load(data, dir)
+        load(data)
         navigate('/project')
       } catch (e) {
         if ((e as DOMException).name !== 'AbortError') {
