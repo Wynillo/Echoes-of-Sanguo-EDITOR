@@ -1,3 +1,18 @@
+export async function readJsonFile(
+  dir: FileSystemDirectoryHandle,
+  path: string
+): Promise<unknown> {
+  const parts = path.split('/')
+  let current = dir
+  for (const part of parts.slice(0, -1)) {
+    current = await current.getDirectoryHandle(part)
+  }
+  const fh = await current.getFileHandle(parts[parts.length - 1])
+  const file = await fh.getFile()
+  const text = await file.text()
+  return JSON.parse(text)
+}
+
 export async function writeJsonFile(
   dir: FileSystemDirectoryHandle,
   path: string,

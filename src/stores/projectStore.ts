@@ -55,6 +55,12 @@ interface ProjectStore {
   updateCard: (id: number, patch: Partial<EditorCard>) => void
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
+  setOpponents: (opponents: ProjectData['opponents']) => void
+  setCampaign: (campaign: ProjectData['campaign']) => void
+  setShop: (shop: ProjectData['shop']) => void
+  setFusion: (fusion: ProjectData['fusion']) => void
+  setStarterDecks: (starterDecks: ProjectData['starterDecks']) => void
+  setCurrencies: (currencies: ProjectData['currencies']) => void
   setDirHandle: (dir: FileSystemDirectoryHandle) => void
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
 }
@@ -80,6 +86,18 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   })),
 
   setCards: (cards) => set((s) => ({ data: { ...s.data, cards } })),
+
+  setOpponents: (opponents) => set((s) => ({ data: { ...s.data, opponents } })),
+
+  setCampaign: (campaign) => set((s) => ({ data: { ...s.data, campaign } })),
+
+  setShop: (shop) => set((s) => ({ data: { ...s.data, shop } })),
+
+  setFusion: (fusion) => set((s) => ({ data: { ...s.data, fusion } })),
+
+  setStarterDecks: (starterDecks) => set((s) => ({ data: { ...s.data, starterDecks } })),
+
+  setCurrencies: (currencies) => set((s) => ({ data: { ...s.data, currencies } })),
 
   setData: (key, value) => set((s) => ({ data: { ...s.data, [key]: value } })),
 
