@@ -10,14 +10,14 @@ describe('projectStore', () => {
 
   it('loads project data', () => {
     const { load } = useProjectStore.getState()
-    load({ cards: [{ id: 1, type: 1, rarity: 1 }] } as any, null as any)
+    load({ cards: [{ id: 1, type: 1, rarity: 1 }] } as any)
     expect(useProjectStore.getState().isLoaded).toBe(true)
     expect(useProjectStore.getState().data.cards).toHaveLength(1)
   })
 
   it('updates a card by id', () => {
     const { load, updateCard } = useProjectStore.getState()
-    load({ cards: [{ id: 1, type: 1, rarity: 1, atk: 1000 }] } as any, null as any)
+    load({ cards: [{ id: 1, type: 1, rarity: 1, atk: 1000 }] } as any)
     updateCard(1, { atk: 2000 })
     expect(useProjectStore.getState().data.cards[0].atk).toBe(2000)
   })
@@ -37,7 +37,7 @@ describe('projectStore', () => {
   it('load merges custom attributes over defaults', () => {
     const { load } = useProjectStore.getState()
     const custom = [{ id: 1, key: 'Void', value: 'Void', color: '#000000' }]
-    load({ attributes: custom } as any, null as any)
+    load({ attributes: custom } as any)
     expect(useProjectStore.getState().data.attributes).toHaveLength(1)
     expect(useProjectStore.getState().data.attributes[0].key).toBe('Void')
   })

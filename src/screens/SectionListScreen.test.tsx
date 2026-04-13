@@ -8,7 +8,7 @@ beforeEach(() => {
   useProjectStore.getState().load({
     cards: [{ id: 1, type: 1, rarity: 1, atk: 2400 } as any],
     locales: { en: { common: {}, cards: { '1': { name: 'Red Dragon', description: '' } }, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
-  } as any, null)
+  } as any)
 })
 
 it('renders card name in list', () => {

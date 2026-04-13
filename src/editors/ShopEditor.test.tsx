@@ -7,7 +7,7 @@ beforeEach(() => useProjectStore.getState().load({
   shop: [{ id: 'p1', name: 'Starter Pack', cost: 100, drawCount: 5, cardPool: [] }],
   cards: [],
   locales: { en: { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } },
-} as any, null))
+} as any))
 
 it('renders pack name', () => {
   render(<MemoryRouter><ShopEditor /></MemoryRouter>)
