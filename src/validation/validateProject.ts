@@ -97,6 +97,20 @@ export function validateProject(data: ProjectData): ValidationResult {
         issues.push({ domain: 'cards', entityId: card.id, message: `Card ${card.id} missing locale entry for language "${lang}"`, severity: 'warning' })
       }
     }
+
+    // Opponents without locale entries
+    for (const opp of data.opponents) {
+      if (!localeData.opponents[String(opp.id)]) {
+        issues.push({ domain: 'opponents', entityId: opp.id, message: `Opponent ${opp.id} missing locale entry for language "${lang}"`, severity: 'warning' })
+      }
+    }
+
+    // Shop packs without locale entries
+    for (const pack of data.shop) {
+      if (!localeData.shop[pack.id]) {
+        issues.push({ domain: 'shop', entityId: pack.id, message: `Shop pack "${pack.id}" missing locale entry for language "${lang}"`, severity: 'warning' })
+      }
+    }
   }
 
   return {

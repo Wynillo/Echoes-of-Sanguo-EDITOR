@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft } from 'react-icons/fa6'
+import { FaArrowLeft, FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorShopPack } from '../types/project'
@@ -64,10 +64,15 @@ export default function ShopEditor() {
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Currency</label>
-                <select value={pack.currencyId ?? ''} onChange={(e) => patch(pack.id, { currencyId: e.target.value || undefined })} className={`${inputCls} w-full`}>
-                  <option value="">— default —</option>
-                  {data.currencies.map((c) => <option key={c.id} value={c.id}>{c.id} ({c.icon})</option>)}
-                </select>
+                <div className="flex items-center gap-2">
+                  <select value={pack.currencyId ?? ''} onChange={(e) => patch(pack.id, { currencyId: e.target.value || undefined })} className={`${inputCls} w-full`}>
+                    <option value="">— default —</option>
+                    {data.currencies.map((c) => <option key={c.id} value={c.id}>{c.id} ({c.icon})</option>)}
+                  </select>
+                  {pack.currencyId && !data.locales.en?.common[pack.currencyId] && (
+                    <FaTriangleExclamation className="text-amber-500 flex-shrink-0" size={16} title="Currency locale entry missing" />
+                  )}
+                </div>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Unlock Condition</label>

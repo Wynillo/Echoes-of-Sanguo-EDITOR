@@ -72,6 +72,7 @@ export async function importTcgResult(
   } : DEFAULT_RULES
 
   const shopPacks = (result.shopData as any)?.packs ?? []
+  const shopCurrencies = (result.shopData as any)?.currencies ?? []
   const normalizedPacks = shopPacks.map((pack: any) => {
     const cardPool = Array.isArray(pack.cardPool)
       ? pack.cardPool
@@ -101,7 +102,7 @@ export async function importTcgResult(
     attributes: typeMeta?.attributes ?? DEFAULT_ATTRIBUTES,
     races: typeMeta?.races ?? DEFAULT_RACES,
     images: {},
-    currencies: [],
+    currencies: shopCurrencies,
     starterDecks: [],
   }
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaPlus, FaXmark } from 'react-icons/fa6'
+import { FaArrowLeft, FaPlus, FaXmark, FaUpload } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { createEmptyLocaleData, getLanguages } from '../utils/localeHelpers'
 import type { LocaleData } from '../types/project'
+import LocaleImporter from '../components/LocaleImporter'
 
 type Domain = 'cards' | 'opponents' | 'shop' | 'campaign' | 'common'
 
@@ -17,12 +18,13 @@ const DOMAIN_TABS: { key: Domain; label: string }[] = [
 
 export default function LocalizationEditor() {
   const navigate = useNavigate()
-  const { data, setData } = useProjectStore()
+  const { data, mergeLocaleData } = useProjectStore()
   const [search, setSearch] = useState('')
   const [activeLang, setActiveLang] = useState('en')
   const [activeDomain, setActiveDomain] = useState<Domain>('cards')
   const [addLangOpen, setAddLangOpen] = useState(false)
   const [newLang, setNewLang] = useState('')
+  const [importOpen, setImportOpen] = useState(false)
 
   const languages = getLanguages(data.locales)
   const langData = data.locales[activeLang] ?? createEmptyLocaleData()
@@ -218,6 +220,9 @@ export default function LocalizationEditor() {
             <FaPlus size={10} /> Add
           </button>
         )}
+        <button onClick={() => setImportOpen(true)} className="cursor-pointer text-indigo-400 hover:text-indigo-300 flex items-center gap-1 text-sm ml-2">
+          <FaUpload size={12} /> Import
+        </button>
       </div>
 
       {/* Domain tabs */}
@@ -236,6 +241,14 @@ export default function LocalizationEditor() {
           <div className="text-gray-500 text-center py-8">{search ? 'No matches.' : `No ${activeDomain} entries yet.`}</div>
         )}
       </div>
+
+      {importOpen && (
+        <LocaleImporter
+          targetLang={activeLang}
+          onImport={(importedData) => mergeLocaleData(activeLang, importedData)}
+          onClose={() => setImportOpen(false)}
+        />
+      )}
     </div>
   )
 }
