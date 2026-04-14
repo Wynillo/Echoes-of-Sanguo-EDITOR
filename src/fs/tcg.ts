@@ -4,6 +4,25 @@ import JSZip from 'jszip'
 import type { ProjectData } from '../types/project'
 import { convertToWebp } from '../utils/imageConvert'
 
+function convertCampaignForExport(campaign: any[]): any[] {
+  return campaign.map((ch: any) => {
+    const titleKey = ch.titleKey ?? `campaign.${ch.id}`
+    const nodes = (ch.nodes ?? []).map((node: any) => {
+      const converted: any = { ...node }
+      if (converted.opponentSequence && Array.isArray(converted.opponentSequence)) {
+        converted.gauntlet = converted.opponentSequence
+        delete converted.opponentSequence
+      }
+      if (converted.type === 'boss') {
+        converted.type = 'duel'
+        converted.isBoss = true
+      }
+      return converted
+    })
+    return { ...ch, titleKey, nodes }
+  })
+}
+
 export type { TcgLoadResult }
 
 // Hardcoded reference data matching MOD-base
@@ -38,7 +57,7 @@ export async function exportTcgToBlob(
   // Core data files
   zip.file('cards.json', JSON.stringify(data.cards, null, 2))
   zip.file('opponents.json', JSON.stringify(data.opponents, null, 2))
-  zip.file('campaign.json', JSON.stringify(data.campaign, null, 2))
+  zip.file('campaign.json', JSON.stringify({ chapters: convertCampaignForExport(data.campaign) }, null, 2))
   zip.file('fusion_formulas.json', JSON.stringify(data.fusion, null, 2))
   zip.file('rules.json', JSON.stringify(data.rules, null, 2))
   zip.file('attributes.json', JSON.stringify(data.attributes, null, 2))
@@ -49,8 +68,20 @@ export async function exportTcgToBlob(
   zip.file('rarities.json', JSON.stringify(RARITIES, null, 2))
 
   // Shop with embedded currencies
+  const exportPacks = data.shop.map((pack: any) => {
+    const tcgPack: any = { ...pack }
+    if (tcgPack.currencyId || tcgPack.cost !== undefined) {
+      tcgPack.price = { currencyId: tcgPack.currencyId ?? 'coins', amount: tcgPack.cost ?? 0 }
+      delete tcgPack.cost
+      delete tcgPack.currencyId
+    }
+    if (Array.isArray(tcgPack.cardPool)) {
+      tcgPack.cardPool = { include: { ids: tcgPack.cardPool } }
+    }
+    return tcgPack
+  })
   zip.file('shop.json', JSON.stringify({
-    packs: data.shop,
+    packs: exportPacks,
     currencies: data.currencies,
   }, null, 2))
 

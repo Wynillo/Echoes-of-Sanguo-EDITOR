@@ -3,6 +3,25 @@ import type { ProjectData } from '../types/project'
 import { writeJsonFile } from './writer'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 import { DEFAULT_ATTRIBUTES, DEFAULT_RACES, DEFAULT_RULES } from '../stores/projectStore'
+import { autoCreateMissingCurrencies, autoCreateMissingOpponents, syncLocaleEntries } from '../utils/autoCreateEntities'
+
+function convertCampaignChapters(chapters: any[]): any[] {
+  return chapters.map((ch: any) => {
+    const title = ch.title ?? ch.titleKey ?? ''
+    const nodes = (ch.nodes ?? []).map((node: any) => {
+      const converted: any = { ...node }
+      if (node.gauntlet && Array.isArray(node.gauntlet)) {
+        converted.opponentSequence = node.gauntlet
+        delete converted.gauntlet
+      }
+      if (node.type === 'duel' && node.isBoss && !converted.opponentSequence) {
+        converted.type = 'boss'
+      }
+      return converted
+    })
+    return { ...ch, title, nodes }
+  })
+}
 
 export async function importTcgResult(
   result: TcgLoadResult,
@@ -36,7 +55,25 @@ export async function importTcgResult(
     return opp
   })
 
+  if (result.opponentDescriptions) {
+    result.opponentDescriptions.forEach((descriptions, _lang) => {
+      for (const desc of descriptions) {
+        if (!localeData.opponents[String(desc.id)]) {
+          localeData.opponents[String(desc.id)] = {
+            name: desc.name ?? '',
+            title: desc.title ?? '',
+            flavor: desc.flavor ?? '',
+          }
+        }
+      }
+    })
+  }
+
   const typeMeta = (result as any).typeMeta
+
+  const campaign = convertCampaignChapters((result.campaignData as any)?.chapters ?? [])
+
+  const populatedOpponents = autoCreateMissingOpponents(campaign, opponents, { en: localeData })
 
   if (dir) {
     const rulesToSave = result.rules ? {
@@ -51,8 +88,8 @@ export async function importTcgResult(
     await Promise.all([
       writeJsonFile(dir, 'cards.json', cards),
       writeJsonFile(dir, 'locales/en.json', localeData),
-      writeJsonFile(dir, 'opponents.json', opponents),
-      writeJsonFile(dir, 'campaign.json', result.campaignData ?? { chapters: [] }),
+      writeJsonFile(dir, 'opponents.json', populatedOpponents),
+      writeJsonFile(dir, 'campaign.json', { chapters: campaign }),
       writeJsonFile(dir, 'shop.json', result.shopData ?? { packs: [], currencies: [] }),
       writeJsonFile(dir, 'fusion_formulas.json', result.fusionFormulas ?? []),
       ...(rulesToSave ? [writeJsonFile(dir, 'rules.json', rulesToSave)] : []),
@@ -77,22 +114,34 @@ export async function importTcgResult(
     const cardPool = Array.isArray(pack.cardPool)
       ? pack.cardPool
       : pack.cardPool?.include?.ids ?? []
+    const price = typeof pack.price === 'object' ? pack.price : null
     return {
       id: pack.id,
       name: pack.name ?? pack.nameKey ?? 'Pack',
-      cost: pack.cost ?? pack.price?.amount ?? 0,
+      cost: pack.cost ?? price?.amount ?? (typeof pack.price === 'number' ? pack.price : 0),
       drawCount: pack.drawCount ?? pack.slots?.reduce((sum: number, s: any) => sum + (s.count ?? 0), 0) ?? 0,
       cardPool,
-      currencyId: pack.currencyId ?? pack.price?.currencyId,
+      currencyId: pack.currencyId ?? price?.currencyId,
       unlockCondition: pack.unlockCondition?.type ? `${pack.unlockCondition.type}:${pack.unlockCondition.nodeId}` : undefined,
     }
   })
 
+  const currencies = autoCreateMissingCurrencies(normalizedPacks, populatedOpponents, shopCurrencies, { en: localeData })
+
+  syncLocaleEntries(populatedOpponents, normalizedPacks, currencies, { en: localeData })
+
+  const starterDecks = result.starterDecks
+    ? Object.entries(result.starterDecks).map(([raceId, cardIds]) => ({
+        raceId: parseInt(raceId, 10),
+        cardIds: cardIds as number[],
+      }))
+    : []
+
   return {
     cards,
     locales: { en: localeData },
-    opponents,
-    campaign: (result.campaignData as any)?.chapters ?? [],
+    opponents: populatedOpponents,
+    campaign,
     shop: normalizedPacks,
     fusion: result.fusionFormulas?.map(f => ({
       ...f,
@@ -102,7 +151,7 @@ export async function importTcgResult(
     attributes: typeMeta?.attributes ?? DEFAULT_ATTRIBUTES,
     races: typeMeta?.races ?? DEFAULT_RACES,
     images: {},
-    currencies: shopCurrencies,
-    starterDecks: [],
+    currencies,
+    starterDecks,
   }
 }
