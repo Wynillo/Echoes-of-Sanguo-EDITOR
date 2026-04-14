@@ -2,8 +2,6 @@ import { useProjectStore } from './stores/projectStore'
 import { saveProject } from './db/indexedDb'
 import { scheduleSave } from './fs/writer'
 
-let lastSaveId: string | null = null
-
 export function startAutoSave(): () => void {
   return useProjectStore.subscribe((state) => {
     const { isLoaded, data } = state
@@ -12,9 +10,8 @@ export function startAutoSave(): () => void {
     const projectId = data.modInfo.id
 
     scheduleSave(async () => {
-      if (lastSaveId === projectId) return
-      lastSaveId = projectId
-      await saveProject(projectId, data.modInfo.name || projectId, data)
+      const latest = useProjectStore.getState()
+      await saveProject(projectId, latest.data.modInfo.name || projectId, latest.data)
     })
   })
 }
