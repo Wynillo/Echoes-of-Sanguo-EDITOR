@@ -117,55 +117,73 @@ export async function loadTcgFromUrl(
   url: string,
   onProgress?: (progress: DownloadProgress) => void
 ): Promise<TcgLoadResult> {
-  console.log('Downloading from URL:', url)
-  const response = await fetch(url, { 
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'omit'
-  })
-  console.log('Response status:', response.status, 'Redirected:', response.redirected, 'Final URL:', response.url)
-  if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error('Mod file not found. Verify the URL is correct.')
+  try {
+    console.log('[TCG Download] Starting download from:', url)
+    const response = await fetch(url, { 
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit'
+    })
+    console.log('[TCG Download] Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      redirected: response.redirected,
+      finalURL: response.url,
+      contentType: response.headers.get('content-type'),
+      contentLength: response.headers.get('content-length')
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Mod file not found. Verify the URL is correct.')
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
-    throw new Error(`Failed to download: ${response.statusText} (${response.status})`)
-  }
 
-  const contentLength = response.headers.get('Content-Length')
-  const total = contentLength ? parseInt(contentLength, 10) : null
+    const contentLength = response.headers.get('Content-Length')
+    console.log('[TCG Download] Content-Length header:', contentLength)
+    const total = contentLength ? parseInt(contentLength, 10) : null
 
-  const reader = response.body?.getReader()
-  if (!reader) {
-    throw new Error('ReadableStream not supported')
-  }
-
-  const chunks: Uint8Array[] = []
-  let loaded = 0
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    chunks.push(value)
-    loaded += value.length
-
-    if (onProgress) {
-      onProgress({
-        loaded,
-        total,
-        percent: total ? Math.round((loaded / total) * 100) : 0,
-      })
+    console.log('[TCG Download] Reading response body...')
+    const reader = response.body?.getReader()
+    if (!reader) {
+      throw new Error('ReadableStream not supported in this browser')
     }
-  }
 
-  const buffer = new Uint8Array(loaded)
-  let offset = 0
-  for (const chunk of chunks) {
-    buffer.set(chunk, offset)
-    offset += chunk.length
-  }
+    const chunks: Uint8Array[] = []
+    let loaded = 0
 
-  return loadTcgFile(buffer.buffer)
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      chunks.push(value)
+      loaded += value.length
+      console.log('[TCG Download] Progress:', loaded, '/', total || '?', 'bytes')
+
+      if (onProgress) {
+        onProgress({
+          loaded,
+          total,
+          percent: total ? Math.round((loaded / total) * 100) : 0,
+        })
+      }
+    }
+
+    console.log('[TCG Download] Complete! Total bytes:', loaded)
+    const buffer = new Uint8Array(loaded)
+    let offset = 0
+    for (const chunk of chunks) {
+      buffer.set(chunk, offset)
+      offset += chunk.length
+    }
+
+    console.log('[TCG Download] Parsing TCG file...')
+    return loadTcgFile(buffer.buffer)
+  } catch (error) {
+    console.error('[TCG Download] Failed:', error)
+    throw error
+  }
 }
 
 const GITHUB_RELEASE_REGEX = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/(download|tag|latest)\/.+\/.+\.tcg$/i

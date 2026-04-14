@@ -127,12 +127,18 @@ export default function StartScreen() {
     } catch (e) {
       setIsDownloading(false)
       setDownloadProgress(0)
+      console.error('=== URL IMPORT ERROR ===')
+      console.error('Error type:', (e as Error).name)
+      console.error('Error message:', (e as Error).message)
+      console.error('Full stack trace:', (e as Error).stack)
+      console.error('Error object:', e)
+      console.error('========================')
+      
       let errorMsg = (e as Error).message
-      console.error('URL import error:', e)
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network') || errorMsg.includes('Failed to download')) {
-        errorMsg = 'Failed to download: ' + (e as Error).message + '. Check CORS or try a different URL.'
+        errorMsg = 'Failed to download: ' + (e as Error).message + '\n\nCheck browser console (F12) for full error details.'
       } else if (errorMsg.includes('CORS')) {
-        errorMsg = 'This URL does not allow browser access. Use a GitHub or GitLab release link.'
+        errorMsg = 'CORS error: This URL does not allow browser access.'
       }
       setUrlError(errorMsg)
     }
