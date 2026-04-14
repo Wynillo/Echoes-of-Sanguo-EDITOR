@@ -18,7 +18,7 @@ const DOMAIN_TABS: { key: Domain; label: string }[] = [
 
 export default function LocalizationEditor() {
   const navigate = useNavigate()
-  const { data, mergeLocaleData } = useProjectStore()
+  const { data, setData, mergeLocaleData } = useProjectStore()
   const [search, setSearch] = useState('')
   const [activeLang, setActiveLang] = useState('en')
   const [activeDomain, setActiveDomain] = useState<Domain>('cards')
