@@ -128,8 +128,9 @@ export default function StartScreen() {
       setIsDownloading(false)
       setDownloadProgress(0)
       let errorMsg = (e as Error).message
-      if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
-        errorMsg = 'Failed to download. Check your internet connection and try again.'
+      console.error('URL import error:', e)
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network') || errorMsg.includes('Failed to download')) {
+        errorMsg = 'Failed to download: ' + (e as Error).message + '. Check CORS or try a different URL.'
       } else if (errorMsg.includes('CORS')) {
         errorMsg = 'This URL does not allow browser access. Use a GitHub or GitLab release link.'
       }

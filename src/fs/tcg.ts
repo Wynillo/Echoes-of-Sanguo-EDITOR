@@ -117,12 +117,18 @@ export async function loadTcgFromUrl(
   url: string,
   onProgress?: (progress: DownloadProgress) => void
 ): Promise<TcgLoadResult> {
-  const response = await fetch(url, { method: 'GET' })
+  console.log('Downloading from URL:', url)
+  const response = await fetch(url, { 
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'omit'
+  })
+  console.log('Response status:', response.status, 'Redirected:', response.redirected, 'Final URL:', response.url)
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error('Mod file not found. Verify the URL is correct.')
     }
-    throw new Error(`Failed to download: ${response.statusText}`)
+    throw new Error(`Failed to download: ${response.statusText} (${response.status})`)
   }
 
   const contentLength = response.headers.get('Content-Length')
