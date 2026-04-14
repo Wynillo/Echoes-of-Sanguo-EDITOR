@@ -7,6 +7,7 @@ import { readProjectFolder } from '@/fs/reader'
 import { useProjectStore } from '@/stores/projectStore'
 import { listProjects, getProjectCount, getOldestProject } from '@/db/indexedDb'
 import type { ProjectMeta } from '@/db/indexedDb'
+import { getLastProjectId } from '@/autosave'
 
 const MAX_PROJECTS = 3
 
@@ -35,7 +36,15 @@ export default function StartScreen() {
 
   useEffect(() => {
     loadSavedProjects()
+    restoreLastProject()
   }, [])
+
+  async function restoreLastProject() {
+    const lastId = getLastProjectId()
+    if (!lastId) return
+    await loadFromIndexedDB(lastId)
+    if (useProjectStore.getState().isLoaded) navigate('/project')
+  }
 
   async function loadSavedProjects() {
     const projects = await listProjects()
