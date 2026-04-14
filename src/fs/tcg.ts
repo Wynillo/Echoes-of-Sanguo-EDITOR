@@ -162,9 +162,9 @@ export async function loadTcgFromUrl(
   return loadTcgFile(buffer.buffer)
 }
 
-const GITHUB_RELEASE_REGEX = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/(latest|download)\/[^/]+\.tcg$/i
-const GITHUB_RAW_REGEX = /^https:\/\/(raw\.githubusercontent\.com|github\.com)\/[^/]+\/[^/]+\/[^/]+\/[^/]+\/.*\.tcg$/i
-const GITLAB_RELEASE_REGEX = /^https:\/\/gitlab\.com\/[^/]+\/[^/]+\/-\/releases\/[^/]+\/downloads\/.*\.tcg$/i
+const GITHUB_RELEASE_REGEX = /^https:\/\/github\.com\/[^/]+\/[^/]+\/releases\/(download|tag|latest)\/.+\/.+\.tcg$/i
+const GITHUB_RAW_REGEX = /^https:\/\/raw\.githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/.+\.tcg$/i
+const GITLAB_RELEASE_REGEX = /^https:\/\/gitlab\.com\/[^/]+\/[^/]+\/-\/releases\/[^/]+\/downloads\/.+\.tcg$/i
 
 export function validateReleaseUrl(url: string): { valid: boolean; type?: 'github' | 'gitlab'; error?: string } {
   if (!url.startsWith('https://')) {
