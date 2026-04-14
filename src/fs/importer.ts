@@ -71,12 +71,28 @@ export async function importTcgResult(
     handLimit: result.rules.handLimitDraw,
   } : DEFAULT_RULES
 
+  const shopPacks = (result.shopData as any)?.packs ?? []
+  const normalizedPacks = shopPacks.map((pack: any) => {
+    const cardPool = Array.isArray(pack.cardPool)
+      ? pack.cardPool
+      : pack.cardPool?.include?.ids ?? []
+    return {
+      id: pack.id,
+      name: pack.name ?? pack.nameKey ?? 'Pack',
+      cost: pack.cost ?? pack.price?.amount ?? 0,
+      drawCount: pack.drawCount ?? pack.slots?.reduce((sum: number, s: any) => sum + (s.count ?? 0), 0) ?? 0,
+      cardPool,
+      currencyId: pack.currencyId ?? pack.price?.currencyId,
+      unlockCondition: pack.unlockCondition?.type ? `${pack.unlockCondition.type}:${pack.unlockCondition.nodeId}` : undefined,
+    }
+  })
+
   return {
     cards,
     locales: { en: localeData },
     opponents,
     campaign: (result.campaignData as any)?.chapters ?? [],
-    shop: (result.shopData as any)?.packs ?? [],
+    shop: normalizedPacks,
     fusion: result.fusionFormulas?.map(f => ({
       ...f,
       operands: [f.operand1, f.operand2],

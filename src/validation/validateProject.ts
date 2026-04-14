@@ -33,7 +33,7 @@ export function validateProject(data: ProjectData): ValidationResult {
 
   // Shop validations
   for (const pack of data.shop) {
-    for (const cardId of pack.cardPool) {
+    for (const cardId of pack.cardPool ?? []) {
       if (!cardIds.has(cardId)) {
         issues.push({ domain: 'shop', entityId: pack.id, message: `Pack "${pack.id}" card pool references non-existent card ${cardId}`, severity: 'error' })
       }
