@@ -1,11 +1,9 @@
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaTriangleExclamation } from 'react-icons/fa6'
+import { FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorShopPack } from '../types/project'
 
 export default function ShopEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const packs = data.shop
 
@@ -35,13 +33,9 @@ export default function ShopEditor() {
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Shop</span>
+        <span className="font-semibold text-lg">Shop</span>
         <button onClick={addPack} className="cursor-pointer ml-auto bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm transition-colors">+ Add Pack</button>
       </div>
 
@@ -82,8 +76,8 @@ export default function ShopEditor() {
             <DeckBuilder label="Card Pool" value={pack.cardPool} onChange={(ids) => patch(pack.id, { cardPool: ids })} />
           </div>
         ))}
-        {packs.length === 0 && <div className="text-gray-500 text-center py-12">No packs yet.</div>}
+      {packs.length === 0 && <div className="text-gray-500 text-center py-12">No packs yet.</div>}
       </div>
-    </div>
+    </>
   )
 }

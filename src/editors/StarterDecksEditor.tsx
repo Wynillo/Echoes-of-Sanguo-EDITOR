@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
+import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorStarterDeck } from '../types/project'
 
 export default function StarterDecksEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const decks = data.starterDecks
   const [selectedIdx, setSelectedIdx] = useState<number>(0)
@@ -38,13 +36,9 @@ export default function StarterDecksEditor() {
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Starter Decks</span>
+        <span className="font-semibold text-lg">Starter Decks</span>
       </div>
 
       <div className="flex gap-6">
@@ -95,6 +89,6 @@ export default function StarterDecksEditor() {
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }

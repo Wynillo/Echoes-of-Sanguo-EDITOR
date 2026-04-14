@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaPlus, FaXmark, FaUpload } from 'react-icons/fa6'
+import { FaPlus, FaXmark, FaUpload } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import { createEmptyLocaleData, getLanguages } from '../utils/localeHelpers'
 import type { LocaleData } from '../types/project'
@@ -17,7 +16,6 @@ const DOMAIN_TABS: { key: Domain; label: string }[] = [
 ]
 
 export default function LocalizationEditor() {
-  const navigate = useNavigate()
   const { data, setData, mergeLocaleData } = useProjectStore()
   const [search, setSearch] = useState('')
   const [activeLang, setActiveLang] = useState('en')
@@ -180,13 +178,9 @@ export default function LocalizationEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Localization</span>
+        <span className="font-semibold text-lg">Localization</span>
         <input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
           className="ml-auto bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm w-64" />
@@ -249,6 +243,6 @@ export default function LocalizationEditor() {
           onClose={() => setImportOpen(false)}
         />
       )}
-    </div>
+    </>
   )
 }
