@@ -118,8 +118,7 @@ export default function StartScreen() {
       })
 
       const data = await importTcgResult(result, null)
-      const projectId = data?.modInfo?.id ?? `import-url-${Date.now()}`
-      load(data ?? {}, null, projectId)
+      load(data ?? {})
       setIsDownloading(false)
       setDownloadProgress(0)
       setUrlInput('')
