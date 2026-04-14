@@ -201,7 +201,11 @@ export default function StartScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 p-8">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-8 p-8 relative">
+      {/* Build version badge */}
+      <div className="absolute bottom-3 left-3 text-xs text-slate-600 font-mono select-none">
+        {__COMMIT_SHA__}
+      </div>
       {/* Hero */}
       <div className="flex flex-col items-center gap-3 text-center">
         <GiScrollUnfurled size={64} className="text-violet-500" />
