@@ -140,10 +140,10 @@ export default function StartScreen() {
       const errorStack = (e as Error).stack || ''
       const fullError = `${errorMsg}\n\nStack Trace:\n${errorStack}`
       
-      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network') || errorMsg.includes('Failed to download')) {
-        errorMsg = 'Failed to download. Check CORS or try a different URL.'
-      } else if (errorMsg.includes('CORS')) {
-        errorMsg = 'CORS error: This URL does not allow browser access.'
+      if (errorMsg.includes('CORS') || errorMsg.includes('Failed to fetch')) {
+        errorMsg = 'CORS Error: GitHub release assets cannot be downloaded directly.\n\nWorkaround: Use a raw.githubusercontent.com URL instead, or download the .tcg file manually and import it via "Import .tcg" button.'
+      } else if (errorMsg.includes('network') || errorMsg.includes('Failed to download')) {
+        errorMsg = 'Failed to download. Check your internet connection.'
       }
       
       setUrlError(errorMsg)

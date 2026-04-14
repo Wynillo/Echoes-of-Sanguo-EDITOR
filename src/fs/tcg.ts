@@ -182,6 +182,10 @@ export async function loadTcgFromUrl(
     return loadTcgFile(buffer.buffer)
   } catch (error) {
     console.error('[TCG Download] Failed:', error)
+    const errorMessage = (error as Error).message
+    if (errorMessage === 'Failed to fetch' || errorMessage.includes('NetworkError')) {
+      throw new Error('CORS Error: GitHub release assets cannot be fetched directly from browsers. Use raw.githubusercontent.com URL instead or download manually.')
+    }
     throw error
   }
 }
