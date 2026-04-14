@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaXmark, FaChevronUp, FaChevronDown } from 'react-icons/fa6'
+import { FaArrowLeft, FaXmark, FaChevronUp, FaChevronDown, FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
 
@@ -107,6 +107,7 @@ export default function CampaignEditor() {
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
   const getOppName = (id: number) => data.locales.en?.opponents[String(id)]?.name ?? `Opponent ${id}`
+  const hasOppLocale = (id: number) => !!data.locales.en?.opponents[String(id)]
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
@@ -191,12 +192,17 @@ export default function CampaignEditor() {
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-xs text-gray-400 mb-1 block">Opponent</label>
-                            <select value={node.opponentId ?? ''}
-                              onChange={(e) => updateNode(selectedChapter.id, node.id, { opponentId: parseInt(e.target.value) || undefined })}
-                              className={`${inputCls} w-full`}>
-                              <option value="">— select —</option>
-                              {data.opponents.map((o) => <option key={o.id} value={o.id}>{getOppName(o.id)}</option>)}
-                            </select>
+                            <div className="flex items-center gap-2">
+                              <select value={node.opponentId ?? ''}
+                                onChange={(e) => updateNode(selectedChapter.id, node.id, { opponentId: parseInt(e.target.value) || undefined })}
+                                className={`${inputCls} w-full`}>
+                                <option value="">— select —</option>
+                                {data.opponents.map((o) => <option key={o.id} value={o.id}>{getOppName(o.id)}</option>)}
+                              </select>
+                              {node.opponentId && !hasOppLocale(node.opponentId) && (
+                                <FaTriangleExclamation className="text-amber-500 flex-shrink-0" size={16} title="Opponent locale entry missing" />
+                              )}
+                            </div>
                           </div>
                           <div>
                             <label className="text-xs text-gray-400 mb-1 block">Is Boss?</label>
@@ -218,6 +224,9 @@ export default function CampaignEditor() {
                               <div key={i} className="flex items-center gap-2 bg-gray-800 rounded px-2 py-1">
                                 <span className="text-xs text-gray-500">{i + 1}.</span>
                                 <span className="text-sm flex-1">{getOppName(oppId)}</span>
+                                {!hasOppLocale(oppId) && (
+                                  <FaTriangleExclamation className="text-amber-500 flex-shrink-0" size={14} title="Opponent locale entry missing" />
+                                )}
                                 <button onClick={() => removeFromSequence(selectedChapter.id, node.id, node, i)}
                                   className="cursor-pointer text-red-400 hover:text-red-300 transition-colors"><FaXmark size={10} /></button>
                               </div>

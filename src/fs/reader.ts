@@ -3,6 +3,7 @@ import type { ProjectData, EditorCard, EditorOpponent,
   EditorAttribute, EditorRace, LocaleData, EditorCurrency, EditorStarterDeck } from '../types/project'
 import { DEFAULT_ATTRIBUTES, DEFAULT_RACES } from '../stores/projectStore'
 import { migrateProjectData } from '../utils/migrations'
+import { autoCreateMissingCurrencies, autoCreateMissingOpponents, syncLocaleEntries } from '../utils/autoCreateEntities'
 
 async function readJson<T>(dir: FileSystemDirectoryHandle, filename: string, fallback: T): Promise<T> {
   try {
@@ -136,16 +137,44 @@ export async function readProjectFolder(dir: FileSystemDirectoryHandle): Promise
     readStarterDecks(dir),
   ])
 
+  // Initialize locales if not loaded
+  const localesData = locales ?? { en: { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} } }
+
+  // Auto-create missing currencies referenced by shop packs
+  const currencies = autoCreateMissingCurrencies(
+    shopData.packs,
+    opponents,
+    shopData.currencies,
+    localesData
+  )
+
+  // Auto-create missing opponents referenced by campaign nodes
+  const populatedOpponents = autoCreateMissingOpponents(
+    campaign,
+    opponents,
+    localesData
+  )
+
+  // Sync locale entries for all entities
+  syncLocaleEntries(populatedOpponents, shopData.packs, currencies, localesData)
+
   const rawData: Record<string, unknown> = {
-    cards, opponents, campaign, fusion, rules, modInfo, images, attributes, races,
+    cards,
+    opponents: populatedOpponents,
+    campaign,
+    fusion,
+    rules,
+    modInfo,
+    images,
+    attributes,
+    races,
+    locales: localesData,
     shop: shopData.packs,
-    currencies: shopData.currencies,
+    currencies,
     starterDecks,
   }
 
-  if (locales) {
-    rawData.locales = locales
-  } else {
+  if (!locales) {
     // Try reading old format for migration
     const oldCardLocales = await readJson<Array<{ id: number; name: string; description: string }>>(
       dir, 'locales/en.json', []

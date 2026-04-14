@@ -60,6 +60,7 @@ interface ProjectStore {
   setCards: (cards: EditorCard[]) => void
   setData: <K extends keyof ProjectData>(key: K, value: ProjectData[K]) => void
   setLocaleField: <D extends keyof LocaleData>(lang: string, domain: D, key: string, value: LocaleData[D][string]) => void
+  mergeLocaleData: (lang: string, newData: LocaleData) => void
   setOpponents: (opponents: any[]) => void
   setCampaign: (campaign: any[]) => void
   setShop: (shop: any[]) => void
@@ -104,6 +105,28 @@ export const useProjectStore = create<ProjectStore>((set) => ({
             ...langData,
             [domain]: { ...domainData, [key]: value },
           },
+        },
+      },
+    }
+  }),
+
+  mergeLocaleData: (lang, newData) => set((s) => {
+    const current = s.data.locales[lang] ?? createEmptyLocaleData()
+    const merged: LocaleData = {
+      common: { ...current.common, ...newData.common },
+      cards: { ...current.cards, ...newData.cards },
+      opponents: { ...current.opponents, ...newData.opponents },
+      shop: { ...current.shop, ...newData.shop },
+      campaign: { ...current.campaign, ...newData.campaign },
+      races: { ...current.races, ...newData.races },
+      attributes: { ...current.attributes, ...newData.attributes },
+    }
+    return {
+      data: {
+        ...s.data,
+        locales: {
+          ...s.data.locales,
+          [lang]: merged,
         },
       },
     }
