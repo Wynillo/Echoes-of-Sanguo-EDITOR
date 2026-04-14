@@ -105,10 +105,10 @@ export async function exportTcgToBlob(
     author: data.modInfo.author,
     type: data.modInfo.type,
     description: data.modInfo.description,
-    minEngineVersion: data.modInfo.minEngineVersion,
+    minEngineVersion: '1.0.0',
   }, null, 2))
   zip.file('manifest.json', JSON.stringify({
-    formatVersion: data.modInfo.formatVersion,
+    formatVersion: 2,
     name: data.modInfo.name,
     author: data.modInfo.author,
   }, null, 2))

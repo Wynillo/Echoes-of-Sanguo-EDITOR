@@ -22,8 +22,6 @@ function ensureModInfo(data: Partial<ProjectData>, fallbackName: string): Partia
       author: data.modInfo?.author || '',
       type: data.modInfo?.type || 'expansion',
       description: data.modInfo?.description || '',
-      minEngineVersion: data.modInfo?.minEngineVersion || '1.0.0',
-      formatVersion: data.modInfo?.formatVersion || 2,
     },
   }
 }
@@ -89,7 +87,7 @@ export default function StartScreen() {
     if (!newName.trim()) return
     const projectId = newName.toLowerCase().replace(/\s+/g, '-')
     load({ modInfo: { id: projectId, name: newName.trim(), version: '1.0.0',
-      author: newAuthor.trim(), type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 } })
+      author: newAuthor.trim(), type: 'expansion', description: '' } })
     setShowNewForm(false)
     navigate('/project')
   }

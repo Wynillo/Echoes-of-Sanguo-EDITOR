@@ -48,11 +48,6 @@ export default function ModInfoEditor() {
             </select>
           ))}
           {field('Description', <textarea value={modInfo.description} onChange={(e) => patch({ description: e.target.value })} className={inputCls} rows={3} />)}
-          {field('Min Engine Version', <input value={modInfo.minEngineVersion} onChange={(e) => patch({ minEngineVersion: e.target.value })} className={inputCls} placeholder="1.0.0" />)}
-          {field('Format Version', (
-            <input type="number" min={1} value={modInfo.formatVersion}
-              onChange={(e) => patch({ formatVersion: parseInt(e.target.value) || 1 })} className={inputCls} />
-          ))}
         </div>
         <p className="text-xs text-gray-500 mt-3">Changes are saved automatically via IndexedDB.</p>
       </div>

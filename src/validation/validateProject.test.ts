@@ -5,7 +5,7 @@ import { createEmptyLocaleData } from '../utils/localeHelpers'
 
 function makeData(overrides: Partial<ProjectData> = {}): ProjectData {
   return {
-    modInfo: { id: 'test', name: 'Test', version: '1.0.0', author: 'Dev', type: 'expansion', description: '', minEngineVersion: '1.0.0', formatVersion: 2 },
+    modInfo: { id: 'test', name: 'Test', version: '1.0.0', author: 'Dev', type: 'expansion', description: '' },
     cards: [{ id: 1, type: 1, rarity: 1 }, { id: 2, type: 1, rarity: 1 }],
     locales: { en: createEmptyLocaleData() },
     opponents: [{ id: 1, coinsWin: 100, coinsLoss: 0, deckIds: [1], behavior: 'default' as const }],
