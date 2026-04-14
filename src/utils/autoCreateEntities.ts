@@ -95,6 +95,9 @@ export function autoCreateMissingOpponents(
   // Sort by ID to maintain order
   newOpponents.sort((a, b) => a.id - b.id)
 
+  // Ensure locale entries exist for auto-created opponents
+  ensureOpponentLocales(newOpponents, locales)
+
   return [...existingOpponents, ...newOpponents]
 }
 
@@ -122,6 +125,46 @@ function ensureCurrencyLocales(
         const key = currency.nameKey.replace('common.', '')
         if (!langData.common[key]) {
           langData.common[key] = defaultNames[key] || currency.id
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Ensure locale entries exist for auto-created opponents
+ */
+function ensureOpponentLocales(
+  opponents: EditorOpponent[],
+  locales: Record<string, LocaleData>
+) {
+  // MOD-base opponent names (partial list - key opponents)
+  const opponentNames: Record<number, { name: string; title: string; flavor: string }> = {
+    1: { name: 'Pang Tong', title: 'The Mentor', flavor: 'A wise advisor at the imperial court.' },
+    2: { name: 'Sun Shangxiang', title: 'Warrior Princess', flavor: 'The fierce princess of Wu.' },
+    3: { name: 'Zhao Yun', title: 'The Brave General', flavor: 'A loyal general with unwavering honor.' },
+    7: { name: 'Cao Pi', title: 'The Usurper', flavor: 'Son of Cao Cao, claimant to the Wei throne.' },
+    8: { name: 'Zhang Jue', title: 'Yellow Turban Leader', flavor: 'Leader of the Yellow Turban Rebellion.' },
+    17: { name: 'Tournament Champion', title: 'Qualifier Winner', flavor: 'Victorious through the tournament brackets.' },
+    31: { name: 'Mi Hun', title: 'Wu Xing Commander', flavor: 'Commander of the Wu Xing forces.' },
+    32: { name: 'Cao Pi', title: 'Emperor of Wei', flavor: 'The traitorous emperor reveals his true colors.' },
+    37: { name: 'Final Guardian', title: 'Last Defense', flavor: 'The final obstacle before the end.' },
+    38: { name: 'Warlord', title: 'Supreme Commander', flavor: 'A master of military strategy.' },
+    39: { name: 'Ultimate Opponent', title: 'The Final Challenge', flavor: 'The ultimate test of skill.' },
+  }
+
+  for (const lang of Object.keys(locales)) {
+    const langData = locales[lang]
+    if (!langData) continue
+
+    for (const opp of opponents) {
+      const oppKey = String(opp.id)
+      if (!langData.opponents[oppKey]) {
+        const defaults = opponentNames[opp.id]
+        langData.opponents[oppKey] = {
+          name: defaults?.name || `Opponent ${opp.id}`,
+          title: defaults?.title || 'Unknown',
+          flavor: defaults?.flavor || 'A mysterious challenger.',
         }
       }
     }
