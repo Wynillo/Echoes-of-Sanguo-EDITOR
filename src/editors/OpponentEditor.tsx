@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorOpponent } from '../types/project'
@@ -65,12 +64,8 @@ export default function OpponentEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project/opponents')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Opponents
-        </button>
-        <span className="text-gray-600">/</span>
         <span className="font-semibold">{oppName || `Opponent ${oppId}`}</span>
         <div className="ml-auto">
           <button onClick={handleDelete} className="cursor-pointer text-red-400 hover:text-red-300 text-sm px-3 py-1.5 rounded-lg border border-red-800 transition-colors">
@@ -110,6 +105,6 @@ export default function OpponentEditor() {
           />
         </div>
       </div>
-    </div>
+    </>
   )
 }

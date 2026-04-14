@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorRules } from '../types/project'
 
@@ -13,7 +11,6 @@ const RULE_FIELDS: Array<{ key: keyof EditorRules; label: string; min: number }>
 ]
 
 export default function RulesEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const rules = data.rules
 
@@ -25,13 +22,9 @@ export default function RulesEditor() {
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white w-full'
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Rules</span>
+        <span className="font-semibold text-lg">Rules</span>
       </div>
 
       <div className="max-w-md">
@@ -50,6 +43,6 @@ export default function RulesEditor() {
           ))}
         </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FaArrowLeft, FaFileImport } from 'react-icons/fa6'
+import { FaFileImport } from 'react-icons/fa6'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
   GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiCardJoker, GiTwoCoins,
@@ -108,15 +108,10 @@ export default function SectionListScreen() {
   const SectionIcon = SECTION_ICONS[section ?? ''] ?? GiCardPick
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate('/project')}
-          className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5"
-        >
-          <FaArrowLeft size={12} /> {t(`section.${section}`)}
-        </button>
+        <span className="font-semibold text-lg">{t(`section.${section}`)}</span>
         <div className="ml-auto flex gap-2">
           {IMPORT_FILE_MAP[section ?? ''] && (
             <button
@@ -202,6 +197,6 @@ export default function SectionListScreen() {
           </p>
         </div>
       )}
-    </div>
+    </>
   )
 }

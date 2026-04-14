@@ -1,12 +1,9 @@
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorModInfo } from '../types/project'
 
 const MOD_TYPES = ['base', 'expansion', 'cosmetic']
 
 export default function ModInfoEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const modInfo = data.modInfo
 
@@ -27,13 +24,9 @@ export default function ModInfoEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">MOD Info</span>
+        <span className="font-semibold text-lg">MOD Info</span>
       </div>
 
       <div className="max-w-lg">
@@ -51,6 +44,6 @@ export default function ModInfoEditor() {
         </div>
         <p className="text-xs text-gray-500 mt-3">Changes are saved automatically via IndexedDB.</p>
       </div>
-    </div>
+    </>
   )
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaXmark, FaChevronUp, FaChevronDown, FaTriangleExclamation } from 'react-icons/fa6'
+import { FaXmark, FaChevronUp, FaChevronDown, FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
 
@@ -14,7 +13,6 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 }
 
 export default function CampaignEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(
     data.campaign[0]?.id ?? null
@@ -110,13 +108,9 @@ export default function CampaignEditor() {
   const hasOppLocale = (id: number) => !!data.locales.en?.opponents[String(id)]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Campaign</span>
+        <span className="font-semibold text-lg">Campaign</span>
       </div>
 
       <div className="flex gap-6">
@@ -295,6 +289,6 @@ export default function CampaignEditor() {
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }

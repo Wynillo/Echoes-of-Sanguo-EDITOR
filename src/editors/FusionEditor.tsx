@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
+import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorFusionFormula, EditorRace } from '../types/project'
 import QuickAddRace from '../components/QuickAddRace'
 
 export default function FusionEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const formulas = data.fusion
   const races = data.races
@@ -50,13 +48,9 @@ export default function FusionEditor() {
   const selCls = inputCls
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5">
-          <FaArrowLeft size={12} /> Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Fusion Formulas</span>
+        <span className="font-semibold text-lg">Fusion Formulas</span>
         <button onClick={addFormula} className="cursor-pointer ml-auto bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm transition-colors">+ Add Formula</button>
       </div>
 
@@ -149,6 +143,6 @@ export default function FusionEditor() {
         ))}
         {formulas.length === 0 && <div className="text-gray-500 text-center py-12">No fusion formulas yet.</div>}
       </div>
-    </div>
+    </>
   )
 }

@@ -1,5 +1,4 @@
 import { useState, Suspense, lazy } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorAttribute, EditorRace } from '../types/project'
 import QuickAddAttribute from '../components/QuickAddAttribute'
@@ -8,7 +7,6 @@ import QuickAddRace from '../components/QuickAddRace'
 const GiIconPicker = lazy(() => import('../components/GiIconPicker'))
 
 export default function GameDataEditor() {
-  const navigate = useNavigate()
   const { data, setData } = useProjectStore()
   const { attributes, races } = data
 
@@ -49,13 +47,9 @@ export default function GameDataEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6 max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/project')} className="text-gray-400 hover:text-white text-sm">
-          ← Dashboard
-        </button>
-        <span className="text-gray-600">/</span>
-        <span className="font-semibold">Game Data</span>
+        <span className="font-semibold text-lg">Game Data</span>
       </div>
 
       {/* Attributes */}

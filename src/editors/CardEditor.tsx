@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { FaArrowLeft, FaXmark } from 'react-icons/fa6'
+import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import CardPreview from '../components/CardPreview'
 import ImagePicker from '../components/ImagePicker'
@@ -96,15 +96,8 @@ export default function CardEditor() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
+    <>
       <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate('/project/cards')}
-          className="cursor-pointer flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors px-2 py-1 -ml-2 rounded hover:bg-white/5"
-        >
-          <FaArrowLeft size={12} /> {t('section.cards')}
-        </button>
-        <span className="text-gray-600">/</span>
         <span className="font-semibold">{locale.name || `Card ${cardId}`}</span>
         <div className="ml-auto flex gap-2">
           <button
@@ -312,6 +305,6 @@ export default function CardEditor() {
           ))}
         </div>
       </div>
-    </div>
+    </>
   )
 }
