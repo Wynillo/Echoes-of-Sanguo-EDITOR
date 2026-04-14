@@ -126,8 +126,6 @@ export interface EditorModInfo {
   author: string
   type: string
   description: string
-  minEngineVersion: string
-  formatVersion: number
 }
 
 // --- Attribute & Race ---

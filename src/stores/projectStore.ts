@@ -39,7 +39,7 @@ export const DEFAULT_RACES: EditorRace[] = [
 
 const EMPTY_DATA: ProjectData = {
   modInfo: { id: '', name: '', version: '1.0.0', author: '', type: 'expansion',
-    description: '', minEngineVersion: '1.0.0', formatVersion: 2 },
+    description: '' },
   cards: [],
   locales: { en: createEmptyLocaleData() },
   opponents: [],

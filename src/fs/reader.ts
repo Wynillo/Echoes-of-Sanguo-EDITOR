@@ -119,7 +119,7 @@ export async function readProjectFolder(dir: FileSystemDirectoryHandle): Promise
   }
   const DEFAULT_MOD_INFO: EditorModInfo = {
     id: '', name: '', version: '1.0.0', author: '', type: 'expansion',
-    description: '', minEngineVersion: '1.0.0', formatVersion: 2,
+    description: '',
   }
 
   const [cards, opponents, campaign, fusion, rules, modInfo, images, attributes, races, locales, shopData, starterDecks] = await Promise.all([

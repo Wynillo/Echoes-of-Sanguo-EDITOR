@@ -26,7 +26,7 @@ it('reads cards and modInfo from project folder', async () => {
   const dir = mockDir({
     'cards.json': JSON.stringify([{ id: 1, type: 1, rarity: 1 }]),
     'mod.json': JSON.stringify({ id: 'test', name: 'Test MOD', version: '1.0.0',
-      author: 'dev', type: 'base', description: '', minEngineVersion: '1.0.0', formatVersion: 2 }),
+      author: 'dev', type: 'base', description: '' }),
   })
   const data = await readProjectFolder(dir)
   expect(data.cards).toHaveLength(1)
