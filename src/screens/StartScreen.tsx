@@ -29,6 +29,8 @@ export default function StartScreen() {
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [isDownloading, setIsDownloading] = useState(false)
   const [urlError, setUrlError] = useState<string | null>(null)
+  const [urlErrorDetails, setUrlErrorDetails] = useState<string | null>(null)
+  const [showErrorDetails, setShowErrorDetails] = useState(false)
   const [downloadingFileName, setDownloadingFileName] = useState<string | null>(null)
 
   useEffect(() => {
@@ -135,12 +137,18 @@ export default function StartScreen() {
       console.error('========================')
       
       let errorMsg = (e as Error).message
+      const errorStack = (e as Error).stack || ''
+      const fullError = `${errorMsg}\n\nStack Trace:\n${errorStack}`
+      
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network') || errorMsg.includes('Failed to download')) {
-        errorMsg = 'Failed to download: ' + (e as Error).message + '\n\nCheck browser console (F12) for full error details.'
+        errorMsg = 'Failed to download. Check CORS or try a different URL.'
       } else if (errorMsg.includes('CORS')) {
         errorMsg = 'CORS error: This URL does not allow browser access.'
       }
+      
       setUrlError(errorMsg)
+      setUrlErrorDetails(fullError)
+      setShowErrorDetails(false)
     }
   }
 
@@ -361,8 +369,28 @@ export default function StartScreen() {
               disabled={isDownloading}
             />
             {urlError && (
-              <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-sm text-red-300">
-                {urlError}
+              <div className="bg-red-900/30 border border-red-500/50 rounded-lg overflow-hidden">
+                <div className="p-3 text-sm text-red-300">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="flex-1">{urlError}</span>
+                    {urlErrorDetails && (
+                      <button
+                        onClick={() => setShowErrorDetails(!showErrorDetails)}
+                        className="text-xs text-red-400 hover:text-red-200 underline flex-shrink-0"
+                      >
+                        {showErrorDetails ? 'Hide Details' : 'Show Details'}
+                      </button>
+                    )}
+                  </div>
+                  {showErrorDetails && urlErrorDetails && (
+                    <div className="mt-2 pt-2 border-t border-red-500/30">
+                      <p className="text-xs text-red-400 mb-1 font-semibold">Full Error Details:</p>
+                      <pre className="bg-red-950/50 rounded p-2 text-xs text-red-300 whitespace-pre-wrap break-all font-mono max-h-60 overflow-y-auto">
+                        {urlErrorDetails}
+                      </pre>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             <div className="bg-slate-900/50 rounded-lg p-3 text-xs text-slate-400">
