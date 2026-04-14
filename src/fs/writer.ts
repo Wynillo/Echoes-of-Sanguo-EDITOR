@@ -49,5 +49,9 @@ export async function writeBinaryFile(
 let timer: ReturnType<typeof setTimeout> | null = null
 export function scheduleSave(fn: () => Promise<void>, delay = 500): void {
   if (timer) clearTimeout(timer)
-  timer = setTimeout(() => { fn().catch(console.error) }, delay)
+  timer = setTimeout(() => {
+    fn().catch((e) => {
+      console.error('[autosave] Failed to save project:', e)
+    })
+  }, delay)
 }
