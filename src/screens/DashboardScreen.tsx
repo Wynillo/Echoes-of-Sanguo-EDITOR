@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
   GiCardPick, GiSwordman, GiScrollUnfurled, GiShop,
-  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiCardJoker,
+  GiChemicalDrop, GiScrollQuill, GiWorld, GiInfo, GiCardJoker, GiTwoCoins,
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 
