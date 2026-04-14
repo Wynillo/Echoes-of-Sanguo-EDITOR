@@ -7,8 +7,26 @@ import { readProjectFolder } from '@/fs/reader'
 import { useProjectStore } from '@/stores/projectStore'
 import { listProjects, getProjectCount, getOldestProject } from '@/db/indexedDb'
 import type { ProjectMeta } from '@/db/indexedDb'
+import type { ProjectData } from '@/types/project'
 
 const MAX_PROJECTS = 3
+
+function ensureModInfo(data: Partial<ProjectData>, fallbackName: string): Partial<ProjectData> {
+  const id = data.modInfo?.id || fallbackName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return {
+    ...data,
+    modInfo: {
+      id,
+      name: data.modInfo?.name || fallbackName,
+      version: data.modInfo?.version || '1.0.0',
+      author: data.modInfo?.author || '',
+      type: data.modInfo?.type || 'expansion',
+      description: data.modInfo?.description || '',
+      minEngineVersion: data.modInfo?.minEngineVersion || '1.0.0',
+      formatVersion: data.modInfo?.formatVersion || 2,
+    },
+  }
+}
 
 export default function StartScreen() {
   const { t } = useTranslation()
@@ -87,8 +105,9 @@ export default function StartScreen() {
         const { openTcgFile } = await import('@/fs/tcg')
         const { importTcgResult } = await import('@/fs/importer')
         const result = await openTcgFile(file)
-        const data = await importTcgResult(result, null)
-        load(data ?? {})
+        const raw = await importTcgResult(result, null)
+        const fileName = file.name.replace(/\.tcg$/i, '')
+        load(ensureModInfo(raw ?? {}, fileName))
         navigate('/project')
       } catch (e) {
         alert(`Import failed: ${(e as Error).message}`)
@@ -120,7 +139,7 @@ export default function StartScreen() {
       })
 
       const data = await importTcgResult(result, null)
-      load(data ?? {})
+      load(ensureModInfo(data ?? {}, fileName))
       setIsDownloading(false)
       setDownloadProgress(0)
       setUrlInput('')
@@ -167,7 +186,8 @@ export default function StartScreen() {
     try {
       const dir = await (window as any).showDirectoryPicker({ mode: 'readwrite' })
       const data = await readProjectFolder(dir)
-      load(data)
+      const folderName = dir.name
+      load(ensureModInfo(data, folderName))
       navigate('/project')
     } catch (e) {
       if ((e as DOMException).name !== 'AbortError') console.error(e)
