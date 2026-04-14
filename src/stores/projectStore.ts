@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { ProjectData, EditorCard, EditorAttribute, EditorRace, LocaleData } from '../types/project'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 import { loadProject, deleteProject } from '../db/indexedDb'
+import { setLastProjectId, getLastProjectId, clearLastProjectId } from '../autosave'
 
 export const DEFAULT_RULES = {
   startingLP: 8000,
@@ -75,12 +76,12 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   isLoaded: false,
   data: EMPTY_DATA,
 
-  load: (data) => set({
-    isLoaded: true,
-    data: { ...EMPTY_DATA, ...data },
-  }),
+  load: (data) => {
+    set({ isLoaded: true, data: { ...EMPTY_DATA, ...data } })
+    if (data.modInfo?.id) setLastProjectId(data.modInfo.id)
+  },
 
-  reset: () => set({ isLoaded: false, data: EMPTY_DATA }),
+  reset: () => { clearLastProjectId(); set({ isLoaded: false, data: EMPTY_DATA }) },
 
   updateCard: (id, patch) => set((s) => ({
     data: {
@@ -143,10 +144,12 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     const data = await loadProject(id)
     if (data) {
       set({ isLoaded: true, data: { ...EMPTY_DATA, ...data } })
+      setLastProjectId(id)
     }
   },
 
   deleteFromIndexedDB: async (id) => {
     await deleteProject(id)
+    if (getLastProjectId() === id) clearLastProjectId()
   },
 }))
