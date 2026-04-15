@@ -33,7 +33,7 @@ export default function DashboardScreen() {
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {SECTIONS.map(({ key, dataKey, icon: Icon, labelKey, color }) => {
           const count = sectionCount(data as unknown as Record<string, unknown>, dataKey)
           return (
