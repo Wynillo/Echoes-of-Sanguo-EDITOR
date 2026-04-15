@@ -4,6 +4,7 @@ import { FaSpinner, FaCheck, FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '@/stores/projectStore'
 import { useValidation } from '@/components/ValidationBanner'
 import { exportTcgToBlob, downloadBlob } from '@/fs/tcg'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function TopBar() {
   const { t } = useTranslation()
@@ -36,26 +37,29 @@ export default function TopBar() {
             {completeness === 'complete' ? 'Ready' : completeness === 'warnings' ? `${warnings.length} warnings` : `${errors.length} errors`}
           </div>
         </div>
-        <button
-          onClick={async () => {
-            setExporting(true)
-            try {
-              const blob = await exportTcgToBlob(data)
-              downloadBlob(blob, `${data.modInfo.id || 'mod'}.tcg`)
-            } catch (e) {
-              alert(t('export.error'))
-              console.error(e)
-            } finally {
-              setExporting(false)
-            }
-          }}
-          disabled={hasErrors || exporting}
-          className="cursor-pointer flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
-          title={hasErrors ? 'Fix validation errors before exporting' : undefined}
-        >
-          {exporting && <FaSpinner size={12} className="animate-spin" />}
-          {exporting ? 'Exporting…' : t('dashboard.export')}
-        </button>
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          <button
+            onClick={async () => {
+              setExporting(true)
+              try {
+                const blob = await exportTcgToBlob(data)
+                downloadBlob(blob, `${data.modInfo.id || 'mod'}.tcg`)
+              } catch (e) {
+                alert(t('export.error'))
+                console.error(e)
+              } finally {
+                setExporting(false)
+              }
+            }}
+            disabled={hasErrors || exporting}
+            className="cursor-pointer flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            title={hasErrors ? 'Fix validation errors before exporting' : undefined}
+          >
+            {exporting && <FaSpinner size={12} className="animate-spin" />}
+            {exporting ? 'Exporting…' : t('dashboard.export')}
+          </button>
+        </div>
       </div>
     </div>
   )
