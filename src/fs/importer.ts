@@ -1,5 +1,5 @@
 import type { TcgLoadResult } from '@wynillo/tcg-format'
-import type { ProjectData } from '../types/project'
+import type { LocaleData, ProjectData } from '../types/project'
 import { writeJsonFile } from './writer'
 import { createEmptyLocaleData } from '../utils/localeHelpers'
 import { DEFAULT_ATTRIBUTES, DEFAULT_RACES, DEFAULT_RULES } from '../stores/projectStore'
@@ -55,25 +55,30 @@ export async function importTcgResult(
     return opp
   })
 
+  const locales: Record<string, LocaleData> = { en: localeData }
+
   if (result.opponentDescriptions) {
-    result.opponentDescriptions.forEach((descriptions, _lang) => {
+    for (const [lang, descriptions] of result.opponentDescriptions) {
+      const target = lang === 'en'
+        ? localeData
+        : (locales[lang] ??= createEmptyLocaleData())
       for (const desc of descriptions) {
-        if (!localeData.opponents[String(desc.id)]) {
-          localeData.opponents[String(desc.id)] = {
+        if (!target.opponents[String(desc.id)]) {
+          target.opponents[String(desc.id)] = {
             name: desc.name ?? '',
             title: desc.title ?? '',
             flavor: desc.flavor ?? '',
           }
         }
       }
-    })
+    }
   }
 
   const typeMeta = (result as any).typeMeta
 
   const campaign = convertCampaignChapters((result.campaignData as any)?.chapters ?? [])
 
-  const populatedOpponents = autoCreateMissingOpponents(campaign, opponents, { en: localeData })
+  const populatedOpponents = autoCreateMissingOpponents(campaign, opponents, locales)
 
   if (dir) {
     const rulesToSave = result.rules ? {
@@ -87,7 +92,9 @@ export async function importTcgResult(
 
     await Promise.all([
       writeJsonFile(dir, 'cards.json', cards),
-      writeJsonFile(dir, 'locales/en.json', localeData),
+      ...Object.entries(locales).map(([lang, data]) =>
+        writeJsonFile(dir, `locales/${lang}.json`, data)
+      ),
       writeJsonFile(dir, 'opponents.json', populatedOpponents),
       writeJsonFile(dir, 'campaign.json', { chapters: campaign }),
       writeJsonFile(dir, 'shop.json', result.shopData ?? { packs: [], currencies: [] }),
@@ -126,9 +133,9 @@ export async function importTcgResult(
     }
   })
 
-  const currencies = autoCreateMissingCurrencies(normalizedPacks, populatedOpponents, shopCurrencies, { en: localeData })
+  const currencies = autoCreateMissingCurrencies(normalizedPacks, populatedOpponents, shopCurrencies, locales)
 
-  syncLocaleEntries(populatedOpponents, normalizedPacks, currencies, { en: localeData })
+  syncLocaleEntries(populatedOpponents, normalizedPacks, currencies, locales)
 
   const starterDecks = result.starterDecks
     ? Object.entries(result.starterDecks).map(([raceId, cardIds]) => ({
@@ -139,7 +146,7 @@ export async function importTcgResult(
 
   return {
     cards,
-    locales: { en: localeData },
+    locales,
     opponents: populatedOpponents,
     campaign,
     shop: normalizedPacks,

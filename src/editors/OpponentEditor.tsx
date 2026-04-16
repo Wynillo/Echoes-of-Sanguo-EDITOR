@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
 import type { EditorOpponent } from '../types/project'
-import { getOpponentField } from '../utils/localeHelpers'
+import { getOpponentField, setLocaleField, deleteLocaleKey } from '../utils/localeHelpers'
 
 const BEHAVIORS = ['default', 'smart', 'aggressive', 'defensive', 'cheating'] as const
 
@@ -10,15 +11,17 @@ export default function OpponentEditor() {
   const { id } = useParams<{ section: string; id: string }>()
   const navigate = useNavigate()
   const { data, setData } = useProjectStore()
+  const { i18n } = useTranslation()
+  const lang = i18n.language
 
   const oppId = parseInt(id ?? '0', 10)
   const opp = data.opponents.find((o) => o.id === oppId) ?? {
     id: oppId, coinsWin: 100, coinsLoss: 0, deckIds: [], behavior: 'default',
   } as EditorOpponent
 
-  const oppName = getOpponentField(data.locales, 'en', oppId, 'name')
-  const oppTitle = getOpponentField(data.locales, 'en', oppId, 'title')
-  const oppFlavor = getOpponentField(data.locales, 'en', oppId, 'flavor')
+  const oppName = getOpponentField(data.locales, lang, oppId, 'name')
+  const oppTitle = getOpponentField(data.locales, lang, oppId, 'title')
+  const oppFlavor = getOpponentField(data.locales, lang, oppId, 'flavor')
 
   function patch(update: Partial<EditorOpponent>) {
     const next = data.opponents.map((o) => o.id === oppId ? { ...o, ...update } : o)
@@ -26,27 +29,19 @@ export default function OpponentEditor() {
   }
 
   function patchLocale(field: 'name' | 'title' | 'flavor', value: string) {
-    const current = data.locales.en?.opponents[String(oppId)] ?? { name: '', title: '', flavor: '' }
+    const current = data.locales[lang]?.opponents[String(oppId)]
+      ?? data.locales.en?.opponents[String(oppId)]
+      ?? { name: '', title: '', flavor: '' }
     const updated = { ...current, [field]: value }
-    const nextLocales = {
-      ...data.locales,
-      en: {
-        ...(data.locales.en ?? { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} }),
-        opponents: { ...data.locales.en?.opponents, [String(oppId)]: updated },
-      },
-    }
-    setData('locales', nextLocales)
+    setData('locales', setLocaleField(data.locales, lang, 'opponents', String(oppId), updated))
   }
 
   function handleDelete() {
     if (!confirm('Delete this opponent?')) return
     setData('opponents', data.opponents.filter((o) => o.id !== oppId))
-    // Remove locale entry
-    const nextOpps = { ...data.locales.en?.opponents }
-    delete nextOpps[String(oppId)]
-    const nextLocales = {
-      ...data.locales,
-      en: { ...(data.locales.en ?? { common: {}, cards: {}, opponents: {}, shop: {}, campaign: {}, races: {}, attributes: {} }), opponents: nextOpps },
+    let nextLocales = data.locales
+    for (const langKey of Object.keys(nextLocales)) {
+      nextLocales = deleteLocaleKey(nextLocales, langKey, 'opponents', String(oppId))
     }
     setData('locales', nextLocales)
     navigate('/project/opponents')

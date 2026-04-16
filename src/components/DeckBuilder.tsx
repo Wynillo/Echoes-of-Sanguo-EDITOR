@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
+import { getCardName } from '../utils/localeHelpers'
 
 interface Props {
   value: number[]
@@ -11,9 +13,10 @@ interface Props {
 export default function DeckBuilder({ value, onChange, label }: Props) {
   const [search, setSearch] = useState('')
   const { data } = useProjectStore()
+  const { i18n } = useTranslation()
 
   function getName(id: number) {
-    return data.locales.en?.cards[String(id)]?.name ?? `Card ${id}`
+    return getCardName(data.locales, i18n.language, id)
   }
 
   const available = data.cards

@@ -1,9 +1,13 @@
+import { useTranslation } from 'react-i18next'
 import { useProjectStore } from '../stores/projectStore'
 import type { EditorCurrency } from '../types/project'
 
 export default function CurrencyEditor() {
   const { data, setData } = useProjectStore()
+  const { i18n } = useTranslation()
   const currencies = data.currencies
+  const commonForLang = (key: string) =>
+    data.locales[i18n.language]?.common[key] ?? data.locales.en?.common[key]
 
   function save(next: EditorCurrency[]) {
     setData('currencies', next)
@@ -51,8 +55,8 @@ export default function CurrencyEditor() {
                 <label className="text-xs text-gray-400 mb-1 block">Name Key (locale)</label>
                 <input value={cur.nameKey} onChange={(e) => patch(cur.id, { nameKey: e.target.value })}
                   className={`${inputCls} w-full`} placeholder="common.coins" />
-                {cur.nameKey && data.locales.en?.common[cur.nameKey] && (
-                  <div className="text-xs text-gray-500 mt-1">Preview: {data.locales.en.common[cur.nameKey]}</div>
+                {cur.nameKey && commonForLang(cur.nameKey) && (
+                  <div className="text-xs text-gray-500 mt-1">Preview: {commonForLang(cur.nameKey)}</div>
                 )}
               </div>
               <div>

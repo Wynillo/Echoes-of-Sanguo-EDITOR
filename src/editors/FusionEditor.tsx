@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaXmark } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
+import { getCardName } from '../utils/localeHelpers'
 import type { EditorFusionFormula, EditorRace } from '../types/project'
 import QuickAddRace from '../components/QuickAddRace'
 
 export default function FusionEditor() {
   const { data, setData } = useProjectStore()
+  const { i18n } = useTranslation()
   const formulas = data.fusion
   const races = data.races
   const [quickAddOpen, setQuickAddOpen] = useState<string | null>(null)
@@ -42,7 +45,7 @@ export default function FusionEditor() {
     save(formulas.filter((f) => f.id !== id))
   }
 
-  const getName = (cardId: number) => data.locales.en?.cards[String(cardId)]?.name ?? `Card ${cardId}`
+  const getName = (cardId: number) => getCardName(data.locales, i18n.language, cardId)
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
   const selCls = inputCls
