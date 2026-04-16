@@ -49,8 +49,12 @@ describe('getCardName', () => {
     expect(getCardName(makeLocales(), 'en', 999)).toBe('Card 999')
   })
 
-  it('returns fallback for missing language', () => {
-    expect(getCardName(makeLocales(), 'de', 1)).toBe('Card 1')
+  it('falls back to English when current language is missing', () => {
+    expect(getCardName(makeLocales(), 'de', 1)).toBe('Red Dragon')
+  })
+
+  it('returns placeholder when missing in both current and English', () => {
+    expect(getCardName(makeLocales(), 'de', 999)).toBe('Card 999')
   })
 })
 

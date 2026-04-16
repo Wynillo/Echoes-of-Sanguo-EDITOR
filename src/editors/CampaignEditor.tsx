@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaXmark, FaChevronUp, FaChevronDown, FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
+import { getOpponentName } from '../utils/localeHelpers'
 import type { EditorCampaignChapter, EditorCampaignNode } from '../types/project'
 
 const NODE_TYPES = ['duel', 'duel_elite', 'boss', 'story', 'reward', 'shop', 'branch', 'rest', 'treasure', 'gauntlet'] as const
@@ -14,6 +16,7 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 
 export default function CampaignEditor() {
   const { data, setData } = useProjectStore()
+  const { i18n } = useTranslation()
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(
     data.campaign[0]?.id ?? null
   )
@@ -104,8 +107,9 @@ export default function CampaignEditor() {
   }
 
   const inputCls = 'bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white'
-  const getOppName = (id: number) => data.locales.en?.opponents[String(id)]?.name ?? `Opponent ${id}`
-  const hasOppLocale = (id: number) => !!data.locales.en?.opponents[String(id)]
+  const getOppName = (id: number) => getOpponentName(data.locales, i18n.language, id)
+  const hasOppLocale = (id: number) =>
+    !!(data.locales[i18n.language]?.opponents[String(id)] ?? data.locales.en?.opponents[String(id)])
 
   return (
     <>

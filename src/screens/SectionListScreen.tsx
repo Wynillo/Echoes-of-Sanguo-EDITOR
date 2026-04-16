@@ -7,6 +7,7 @@ import {
 } from 'react-icons/gi'
 import { useProjectStore } from '@/stores/projectStore'
 import { useState } from 'react'
+import { getCardName, getOpponentName } from '@/utils/localeHelpers'
 
 const CARD_TYPE_LABELS = ['All', 'Monster', 'Fusion', 'Spell', 'Trap', 'Equipment']
 
@@ -26,7 +27,7 @@ const SECTION_ICONS: Record<string, React.ComponentType<{ size?: number; classNa
 export default function SectionListScreen() {
   const { section } = useParams<{ section: string }>()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const data = useProjectStore((s) => s.data)
   const setCards = useProjectStore((s) => s.setCards)
   const setOpponents = useProjectStore((s) => s.setOpponents)
@@ -83,10 +84,10 @@ export default function SectionListScreen() {
 
   function getLabel(item: Record<string, unknown>): string {
     if (section === 'cards' || section === 'localization') {
-      return data.locales.en?.cards[String(item['id'])]?.name ?? `Card ${item['id']}`
+      return getCardName(data.locales, i18n.language, item['id'] as number | string)
     }
     if (section === 'opponents') {
-      return data.locales.en?.opponents[String(item['id'])]?.name ?? `Opponent ${item['id']}`
+      return getOpponentName(data.locales, i18n.language, item['id'] as number | string)
     }
     if (section === 'campaign') return (item['title'] as string) ?? String(item['id'])
     if (section === 'shop') return (item['name'] as string) ?? String(item['id'])

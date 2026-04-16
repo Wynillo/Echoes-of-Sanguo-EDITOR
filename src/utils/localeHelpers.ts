@@ -17,7 +17,9 @@ export function getCardName(
   lang: string,
   cardId: number | string,
 ): string {
-  return locales[lang]?.cards[String(cardId)]?.name ?? `Card ${cardId}`
+  return locales[lang]?.cards[String(cardId)]?.name
+    ?? locales.en?.cards[String(cardId)]?.name
+    ?? `Card ${cardId}`
 }
 
 export function getCardDescription(
@@ -25,7 +27,9 @@ export function getCardDescription(
   lang: string,
   cardId: number | string,
 ): string {
-  return locales[lang]?.cards[String(cardId)]?.description ?? ''
+  return locales[lang]?.cards[String(cardId)]?.description
+    ?? locales.en?.cards[String(cardId)]?.description
+    ?? ''
 }
 
 export function getOpponentName(
@@ -33,7 +37,9 @@ export function getOpponentName(
   lang: string,
   oppId: number | string,
 ): string {
-  return locales[lang]?.opponents[String(oppId)]?.name ?? `Opponent ${oppId}`
+  return locales[lang]?.opponents[String(oppId)]?.name
+    ?? locales.en?.opponents[String(oppId)]?.name
+    ?? `Opponent ${oppId}`
 }
 
 export function getOpponentField(
@@ -42,7 +48,9 @@ export function getOpponentField(
   oppId: number | string,
   field: 'name' | 'title' | 'flavor',
 ): string {
-  return locales[lang]?.opponents[String(oppId)]?.[field] ?? ''
+  return locales[lang]?.opponents[String(oppId)]?.[field]
+    ?? locales.en?.opponents[String(oppId)]?.[field]
+    ?? ''
 }
 
 export function getShopName(
@@ -50,7 +58,9 @@ export function getShopName(
   lang: string,
   packId: string,
 ): string {
-  return locales[lang]?.shop[packId]?.name ?? `Pack ${packId}`
+  return locales[lang]?.shop[packId]?.name
+    ?? locales.en?.shop[packId]?.name
+    ?? `Pack ${packId}`
 }
 
 export function getCampaignText(
@@ -58,7 +68,9 @@ export function getCampaignText(
   lang: string,
   key: string,
 ): string {
-  return locales[lang]?.campaign[key] ?? ''
+  return locales[lang]?.campaign[key]
+    ?? locales.en?.campaign[key]
+    ?? ''
 }
 
 /**

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { FaTriangleExclamation } from 'react-icons/fa6'
 import { useProjectStore } from '../stores/projectStore'
 import DeckBuilder from '../components/DeckBuilder'
@@ -5,7 +6,10 @@ import type { EditorShopPack } from '../types/project'
 
 export default function ShopEditor() {
   const { data, setData } = useProjectStore()
+  const { i18n } = useTranslation()
   const packs = data.shop
+  const hasCommonLocale = (key: string) =>
+    !!(data.locales[i18n.language]?.common[key] ?? data.locales.en?.common[key])
 
   function save(next: EditorShopPack[]) {
     setData('shop', next)
@@ -63,7 +67,7 @@ export default function ShopEditor() {
                     <option value="">— default —</option>
                     {data.currencies.map((c) => <option key={c.id} value={c.id}>{c.id} ({c.icon})</option>)}
                   </select>
-                  {pack.currencyId && !data.locales.en?.common[pack.currencyId] && (
+                  {pack.currencyId && !hasCommonLocale(pack.currencyId) && (
                     <FaTriangleExclamation className="text-amber-500 flex-shrink-0" size={16} title="Currency locale entry missing" />
                   )}
                 </div>
